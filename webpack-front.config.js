@@ -8,5 +8,5 @@ module.exports = {
     path: path.resolve(__dirname, "public"),
     filename: "bundle-front.js",
   },
-  mode: 'production',
+  mode: 'development',
 }

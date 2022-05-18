@@ -10,5 +10,5 @@ module.exports = {
     filename: "bundle-back.js"
   },
   externals: [nodeExternals()],
-  mode: "production"
+  mode: "development"
 };

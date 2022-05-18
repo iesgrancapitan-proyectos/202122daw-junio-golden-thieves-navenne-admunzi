@@ -14,6 +14,7 @@ const config = {
     height: DEFAULT_HEIGHT,
   },
   scene: [MainScene],
+  pixelArt: true,
   physics: {
     default: "arcade",
     arcade: {
