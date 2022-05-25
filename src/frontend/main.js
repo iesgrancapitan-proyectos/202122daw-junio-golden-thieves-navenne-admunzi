@@ -2,7 +2,7 @@ import "phaser";
 import MainScene from "./scenes/MainScene";
 
 const DEFAULT_WIDTH = 1024;
-const DEFAULT_HEIGHT = 800;
+const DEFAULT_HEIGHT = 900;
 
 const config = {
   backgroundColor: "#060B21",

@@ -9,14 +9,27 @@ export default class MainScene extends Phaser.Scene {
   init(data) {}
   preload() {
     this.load.atlas("player", "assets/player.png", "assets/player.json");
+    this.load.image("tiles", "assets/base-colour.png")
+    this.load.tilemapTiledJSON("mine", "tiled/terreno.json")
   }
 
   create() {
     const scene = this;
 
+    //
+    const map = this.make.tilemap({ key: 'mine'})
+    const tileset = map.addTilesetImage('base-colour', 'tiles')
+
+    map.createLayer('ground', tileset)
+    map.createLayer('walls', tileset)
+
+
+    // this.physics.world.setBounds(0, 0, 60,60 );
+
+
+
     this.playerLabel = this.add.text(-50, -50, "this is you").setOrigin(0.5, 1);
     this.playersConnectedText = this.add.text(20, 20, "");
-    this.physics.world.setBounds(0, 0, 1024, 750);
 
     this.otherPlayers = this.physics.add.group();
     this.cursors = this.input.keyboard.addKeys({ up: "W", left: "A", down: "S", right: "D" });
@@ -56,6 +69,10 @@ export default class MainScene extends Phaser.Scene {
     });
 
     this.socket.emit("ready");
+
+    // this.cameras.main.setBounds(0, 0, 1920 * 2, 1080 * 2);
+    // this.physics.world.setBounds(0, 0, 1920 * 2, 1080 * 2);
+
   }
 
   update() {

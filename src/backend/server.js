@@ -23,6 +23,9 @@ app.get("/bundle-front.js", (req, res) =>{
 app.get("/assets/*", (req, res) =>{
     res.sendFile(path.join(__dirname,"/../public/"+req.path))
 })
+app.get("/tiled/*", (req, res) =>{
+    res.sendFile(path.join(__dirname,"/../public/"+req.path))
+})
 
 // start game communication server (socket.io)
 clientConnection(io);
