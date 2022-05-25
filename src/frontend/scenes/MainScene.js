@@ -134,7 +134,7 @@ export default class MainScene extends Phaser.Scene {
     this.player.setCollideWorldBounds(true);
   }
 
-  // add any additional players
+  // add any additional players 
   addOtherPlayers(id, playerData) {
     this.otherPlayer = new Player(this, id, playerData);
     this.otherPlayer.anims.play("right_idle", true);
