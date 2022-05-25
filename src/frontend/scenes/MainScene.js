@@ -69,7 +69,7 @@ export default class MainScene extends Phaser.Scene {
 
       // idle
       this.player.setVelocity(0);
-      let leftOrRight = ["left", "left_idle", "up_left", "down_left"].includes(scene.player.keydown)
+      let leftOrRight = ["left", "left_idle", "up", "down"].includes(scene.player.keydown)
         ? "left_idle"
         : "right_idle";
       this.player.keydown = leftOrRight;
@@ -88,14 +88,14 @@ export default class MainScene extends Phaser.Scene {
       // vertical movement
       if (this.cursors.up.isDown) {
         this.player.setVelocityY(-VELOCITY);
-        let leftOrRight = ["left", "left_idle", "up_left", "down_left"].includes(scene.player.keydown)
+        let leftOrRight = ["left", "left_idle", "up", "down"].includes(scene.player.keydown)
           ? "left"
           : "right";
         this.player.anims.play(leftOrRight, true);
         this.player.keydown = leftOrRight;
       } else if (this.cursors.down.isDown) {
         this.player.setVelocityY(VELOCITY);
-        let leftOrRight = ["left", "left_idle", "up_left", "down_left"].includes(scene.player.keydown)
+        let leftOrRight = ["left", "left_idle", "up", "down"].includes(scene.player.keydown)
           ? "left"
           : "right";
         this.player.anims.play(leftOrRight, true);
@@ -137,6 +137,7 @@ export default class MainScene extends Phaser.Scene {
   // add any additional players
   addOtherPlayers(id, playerData) {
     this.otherPlayer = new Player(this, id, playerData);
+    this.otherPlayer.anims.play("right_idle", true);
     this.otherPlayer.setTint(0x7cc78f);
     this.otherPlayers.add(this.otherPlayer);
   }

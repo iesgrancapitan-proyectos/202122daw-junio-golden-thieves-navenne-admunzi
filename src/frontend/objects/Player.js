@@ -32,6 +32,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.anims.create({
       key: "right_idle",
       frameRate: 3,
+      repeat: -1,
       frames: this.anims.generateFrameNames("player", {
         prefix: "right_idle_",
         suffix: ".png",
@@ -56,6 +57,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.anims.create({
       key: "left_idle",
       frameRate: 3,
+      repeat: -1,
       frames: this.anims.generateFrameNames("player", {
         prefix: "left_idle_",
         suffix: ".png",
@@ -64,5 +66,4 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
       })
     });
   }
-
 }
