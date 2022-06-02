@@ -104,14 +104,16 @@ export default class MainScene extends Phaser.Scene {
       }
       
       // idle animation
-      if (this.player.body.velocity.x == 0 && this.player.body.velocity.y == 0) {
+      if (this.player.body.velocity.x == 0 && this.player.body.velocity.y == 0 && !this.input.activePointer.leftButtonDown()) {
         this.player.anims.play(leftOrRight, true);
       }
 
       // mining
       if (this.input.activePointer.leftButtonDown()) {
-        this.player.anims.stop();
-        this.player.anims.play("left_mine", true);
+        let leftOrRight = ["left", "left_idle", "up", "down"].includes(scene.player.keydown)
+          ? "left"
+          : "right";
+        this.player.anims.play(`${leftOrRight}_mine`, true);
       }
 
       // tell the server about movement
