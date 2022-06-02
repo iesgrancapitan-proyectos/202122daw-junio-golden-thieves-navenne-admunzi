@@ -20,6 +20,7 @@ export default class MainScene extends Phaser.Scene {
 
     this.otherPlayers = this.physics.add.group();
     this.cursors = this.input.keyboard.addKeys({ up: "W", left: "A", down: "S", right: "D" });
+    this.input.mouse.disableContextMenu();
 
     // socket connection
     this.socket = io();
@@ -101,10 +102,16 @@ export default class MainScene extends Phaser.Scene {
         this.player.anims.play(leftOrRight, true);
         this.player.keydown = leftOrRight;
       }
-
+      
       // idle animation
       if (this.player.body.velocity.x == 0 && this.player.body.velocity.y == 0) {
         this.player.anims.play(leftOrRight, true);
+      }
+
+      // mining
+      if (this.input.activePointer.leftButtonDown()) {
+        this.player.anims.stop();
+        this.player.anims.play("left_mine", true);
       }
 
       // tell the server about movement
@@ -116,7 +123,7 @@ export default class MainScene extends Phaser.Scene {
           y: scene.player.y,
           keydown: scene.player.keydown,
         });
-      }
+      } 
 
       // save old position
       this.player.oldPosition = {

@@ -65,5 +65,17 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         end: 8,
       })
     });
+
+    this.anims.create({
+      key: "left_mine",
+      frameRate: 8,
+      repeat: -1,
+      frames: this.anims.generateFrameNames("player", {
+        prefix: "left_mine_",
+        suffix: ".png",
+        start: 1,
+        end: 8,
+      })
+    });
   }
 }
