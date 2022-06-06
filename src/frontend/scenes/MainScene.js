@@ -1,5 +1,7 @@
 import io from "socket.io-client";
 import Player from "../objects/Player";
+import RandomPlacePlugin from 'phaser3-rex-plugins/plugins/randomplace-plugin.js';
+import RandomPlace from 'phaser3-rex-plugins/plugins/randomplace.js';
 
 export default class MainScene extends Phaser.Scene {
   constructor() {
@@ -10,23 +12,31 @@ export default class MainScene extends Phaser.Scene {
   preload() {
     this.load.atlas("player", "assets/player.png", "assets/player.json");
     this.load.image("tiles", "assets/base-colour.png")
+    this.load.image("tilesUnderBridge", "assets/base-colour-under-bridge.png")
+    this.load.image("tilesOreVegetables", "assets/mena-vegetables-colour.png")
     this.load.tilemapTiledJSON("mine", "tiled/terreno.json")
+
   }
 
   create() {
     const scene = this;
 
-    //
+    //Tiles Sets
     const map = this.make.tilemap({ key: 'mine'})
     const tileset = map.addTilesetImage('base-colour', 'tiles')
+    const tilesetUnderBridge = map.addTilesetImage('base-colour-under-bridge', 'tilesUnderBridge')
+
 
     map.createLayer('ground', tileset)
-    map.createLayer('walls', tileset)
+    this.fallLayer = map.createLayer('fall', tileset)
+    this.wallsLayer = map.createLayer('walls', tileset)
+    map.createLayer('under-bridge', tilesetUnderBridge)
+    map.createLayer('bridge', tileset)
+    
+    this.wallsLayer.setCollisionByProperty({ collides: true})
+    this.fallLayer.setCollisionByProperty({ collides: true})
 
-
-    // this.physics.world.setBounds(0, 0, 60,60 );
-
-
+    this.physics.world.setBounds(0, 0, this.wallsLayer.width, this.wallsLayer.height);
 
     this.playerLabel = this.add.text(-50, -50, "this is you").setOrigin(0.5, 1);
     this.playersConnectedText = this.add.text(20, 20, "");
@@ -69,10 +79,6 @@ export default class MainScene extends Phaser.Scene {
     });
 
     this.socket.emit("ready");
-
-    // this.cameras.main.setBounds(0, 0, 1920 * 2, 1080 * 2);
-    // this.physics.world.setBounds(0, 0, 1920 * 2, 1080 * 2);
-
   }
 
   update() {
@@ -82,7 +88,11 @@ export default class MainScene extends Phaser.Scene {
       this.playerLabel.x = this.player.x;
       this.playerLabel.y = this.player.y - 40;
 
-      const VELOCITY = 160;
+      //Camera Follow
+      this.cameras.main.startFollow(scene.player, true, 0.05, 0.05);
+
+      // const VELOCITY = 160; ORIGINAL
+      const VELOCITY = 300; //DEV
 
       // idle
       this.player.setVelocity(0);
@@ -148,7 +158,7 @@ export default class MainScene extends Phaser.Scene {
   addPlayer(id, playerData) {
     this.player = new Player(this, id, playerData);
     this.player.setBounce(0.2);
-    this.player.setCollideWorldBounds(true);
+    // this.player.setCollideWorldBounds(true);
   }
 
   // add any additional players
