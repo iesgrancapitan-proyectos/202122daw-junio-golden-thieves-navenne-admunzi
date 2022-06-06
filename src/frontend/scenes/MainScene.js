@@ -1,7 +1,6 @@
 import io from "socket.io-client";
 import Player from "../objects/Player";
-import RandomPlacePlugin from 'phaser3-rex-plugins/plugins/randomplace-plugin.js';
-import RandomPlace from 'phaser3-rex-plugins/plugins/randomplace.js';
+import { Mrpas } from 'mrpas'
 
 export default class MainScene extends Phaser.Scene {
   constructor() {
@@ -16,6 +15,14 @@ export default class MainScene extends Phaser.Scene {
     this.load.image("tilesOreVegetables", "assets/mena-vegetables-colour.png")
     this.load.tilemapTiledJSON("mine", "tiled/terreno.json")
 
+    this.load.image("ore1", "assets/oregold/ore1.png")
+    this.load.image("ore2", "assets/oregold/ore2.png")
+    this.load.image("ore3", "assets/oregold/ore3.png")
+    this.load.image("ore4", "assets/oregold/ore4.png")
+    this.load.image("ore5", "assets/oregold/ore5.png")
+    this.load.image("ore6", "assets/oregold/ore6.png")
+    this.load.image("ore7", "assets/oregold/ore7.png")
+
   }
 
   create() {
@@ -26,15 +33,50 @@ export default class MainScene extends Phaser.Scene {
     const tileset = map.addTilesetImage('base-colour', 'tiles')
     const tilesetUnderBridge = map.addTilesetImage('base-colour-under-bridge', 'tilesUnderBridge')
 
-
-    map.createLayer('ground', tileset)
-    this.fallLayer = map.createLayer('fall', tileset)
-    this.wallsLayer = map.createLayer('walls', tileset)
+    this.groundLayer = map.createLayer('ground', tileset)
+    map.createLayer('outline-ground', tileset)
     map.createLayer('under-bridge', tilesetUnderBridge)
     map.createLayer('bridge', tileset)
-    
-    this.wallsLayer.setCollisionByProperty({ collides: true})
+
+    // console.log(this.oreLayer) // give an array of sprites
+    const AMOUNT_ORE = 600;
+    let items = [];
+  
+    for (var i = 1; i <= AMOUNT_ORE; i++) {
+      items.push(this.add.image(0, 0, 'ore' + Math.floor((Math.random() * (7 - 1 + 1)) + 1)))
+    }
+
+    items.forEach(element => {
+      do {
+        element.x = Math.floor(Math.random() * (3500 - -2700)) + -2700;
+        element.y = Math.floor(Math.random() * (1900 - -2000)) + -2000;
+
+      } while (!this.groundLayer.getTileAtWorldXY(element.x, element.y));
+    });
+
+    this.ores = this.physics.add.staticGroup(items)
+
+    this.fallLayer = map.createLayer('fall', tileset)
     this.fallLayer.setCollisionByProperty({ collides: true})
+
+    this.wallsLayer = map.createLayer('walls', tileset)
+    this.wallsLayer.setCollisionByProperty({ collides: true})
+
+    //CHECK COLLIDES WALLS
+      // const debugGraphicsWALLS = this.add.graphics().setAlpha(0.75);
+      // this.wallsLayer.renderDebug(debugGraphicsWALLS, {
+      //   tileColor: null, // Color of non-colliding tiles
+      //   collidingTileColor: new Phaser.Display.Color(243, 134, 48, 255), // Color of colliding tiles
+      //   faceColor: new Phaser.Display.Color(40, 39, 37, 255) // Color of colliding face edges
+      // });
+
+    //CHECK COLLIDES FALLS
+      // const debugGraphicsFALLS = this.add.graphics().setAlpha(0.75);
+      // this.fallLayer.renderDebug(debugGraphicsFALLS, {
+      //   tileColor: null, // Color of non-colliding tiles
+      //   collidingTileColor: new Phaser.Display.Color(154, 239, 48, 255), // Color of colliding tiles
+      //   faceColor: new Phaser.Display.Color(40, 39, 37, 255) // Color of colliding face edges
+      // });
 
     this.physics.world.setBounds(0, 0, this.wallsLayer.width, this.wallsLayer.height);
 

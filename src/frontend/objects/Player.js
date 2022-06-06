@@ -20,6 +20,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     //Collides
     scene.physics.add.collider(this, scene.wallsLayer);
     scene.physics.add.collider(this, scene.fallLayer);
+    scene.physics.add.collider(this, scene.ores);
 
     this.onWorldBounds = true;
     // this.setCollideWorldBounds(true);
