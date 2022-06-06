@@ -32,7 +32,6 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.anims.create({
       key: "right_idle",
       frameRate: 3,
-      repeat: -1,
       frames: this.anims.generateFrameNames("player", {
         prefix: "right_idle_",
         suffix: ".png",
@@ -44,7 +43,6 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.anims.create({
       key: "right_mine",
       frameRate: 8,
-      repeat: -1,
       frames: this.anims.generateFrameNames("player", {
         prefix: "right_mine_",
         suffix: ".png",
@@ -69,7 +67,6 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.anims.create({
       key: "left_idle",
       frameRate: 3,
-      repeat: -1,
       frames: this.anims.generateFrameNames("player", {
         prefix: "left_idle_",
         suffix: ".png",
@@ -81,7 +78,6 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.anims.create({
       key: "left_mine",
       frameRate: 8,
-      repeat: -1,
       frames: this.anims.generateFrameNames("player", {
         prefix: "left_mine_",
         suffix: ".png",
@@ -90,4 +86,53 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
       })
     });
   }
+
+  playAnimation() {
+
+    const VELOCITY = 160;
+
+    // idle
+    this.setVelocity(0);
+    let leftOrRight = this.checkDirection();
+    this.keydown = `${leftOrRight}_idle`;
+
+    // horizontal movement
+    if (this.scene.cursors.left.isDown) {
+      this.setVelocityX(-VELOCITY);
+      this.anims.play("left", true);
+      this.keydown = "left";
+    } else if (this.scene.cursors.right.isDown) {
+      this.setVelocityX(VELOCITY);
+      this.anims.play("right", true);
+      this.keydown = "right";
+    }
+
+    // vertical movement
+    if (this.scene.cursors.up.isDown) {
+      this.setVelocityY(-VELOCITY);
+      let leftOrRight = this.checkDirection();
+      this.anims.play(leftOrRight, true);
+      this.keydown = leftOrRight;
+    } else if (this.scene.cursors.down.isDown) {
+      this.setVelocityY(VELOCITY);
+      let leftOrRight = this.checkDirection();
+      this.anims.play(leftOrRight, true);
+      this.keydown = leftOrRight;
+    }
+
+    // mining
+    if (this.scene.input.activePointer.leftButtonDown()) {
+      let leftOrRight = this.checkDirection();
+      this.anims.play(`${leftOrRight}_mine`, true);
+    }
+
+    // idle animation
+    if (this.body.velocity.x == 0 && this.body.velocity.y == 0 && !this.scene.input.activePointer.leftButtonDown()) {
+      this.anims.play(`${leftOrRight}_idle`, true);
+    }
+  }
+
+  checkDirection() {
+    return ["left", "left_idle", "up", "down"].includes(this.keydown) ? "left" : "right";
+  } 
 }

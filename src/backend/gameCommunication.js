@@ -16,6 +16,16 @@ export function gameCommunication(socket, currentPlayers) {
     socket.broadcast.emit("player moved", currentPlayers[socket.id]);
   });
 
+  // when a player mines, play animation
+  socket.on("player mining", function () {
+    socket.broadcast.emit("player mined", currentPlayers[socket.id]);
+  });
+
+  // when a player stops mining, stop animation
+  socket.on("player stop mining", function () {
+    socket.broadcast.emit("player mine stopped", currentPlayers[socket.id]);
+  });
+
   /**
    * @function createNewPlayer
    * @description Creates a new player
