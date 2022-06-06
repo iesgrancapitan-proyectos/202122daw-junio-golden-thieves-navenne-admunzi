@@ -14,6 +14,8 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.y = data.y;
     this.keydown = data.keydown;
 
+    //Camera Follow
+    scene.cameras.main.startFollow(this, true, 0.05, 0.05);
 
     // Animations
 
