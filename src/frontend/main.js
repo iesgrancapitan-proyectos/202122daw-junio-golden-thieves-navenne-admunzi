@@ -1,11 +1,12 @@
 import "phaser";
 import MainScene from "./scenes/MainScene";
+import RandomPlacePlugin from 'phaser3-rex-plugins/plugins/randomplace-plugin.js';
 
-const DEFAULT_WIDTH = 1024;
+const DEFAULT_WIDTH = 2048;
 const DEFAULT_HEIGHT = 900;
 
 const config = {
-  backgroundColor: "#060B21",
+  backgroundColor: "#080e16",
   scale: {
     parent: "phaser-game",
     mode: Phaser.Scale.FIT,
@@ -18,9 +19,6 @@ const config = {
   physics: {
     default: "arcade",
     arcade: {
-      gravity: {
-        y: 0,
-      },
       debug: false,
     },
   },

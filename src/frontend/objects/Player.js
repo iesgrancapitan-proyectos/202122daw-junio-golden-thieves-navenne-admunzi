@@ -6,7 +6,10 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     // Enable Physics
     scene.physics.world.enable(this);
 
-    this.setScale(2);
+    scene.cameras.main.zoom = 1.5;
+
+    this.setScale(1.5);
+    this.setBodySize(15,10).setOffset(5,15);
 
     this.loginTime = data.loginTime;
     this.socketId = id;
@@ -14,8 +17,12 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.y = data.y;
     this.keydown = data.keydown;
 
-    //Camera Follow
-    scene.cameras.main.startFollow(this, true, 0.05, 0.05);
+    //Collides
+    scene.physics.add.collider(this, scene.wallsLayer);
+    scene.physics.add.collider(this, scene.fallLayer);
+
+    this.onWorldBounds = true;
+    // this.setCollideWorldBounds(true);
 
     // Animations
 
