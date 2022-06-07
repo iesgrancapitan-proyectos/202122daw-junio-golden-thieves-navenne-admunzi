@@ -1,6 +1,7 @@
 import io from "socket.io-client";
 import Player from "../objects/Player";
 import { Mrpas } from 'mrpas'
+import Ore from "../objects/Ore";
 
 export default class MainScene extends Phaser.Scene {
   constructor() {
@@ -23,6 +24,7 @@ export default class MainScene extends Phaser.Scene {
     this.load.image("ore6", "assets/oregold/ore6.png")
     this.load.image("ore7", "assets/oregold/ore7.png")
 
+    this.load.atlas("ore", "assets/ores.png", "assets/ores.json");
   }
 
   create() {
@@ -79,12 +81,19 @@ export default class MainScene extends Phaser.Scene {
       // });
 
     this.physics.world.setBounds(0, 0, this.wallsLayer.width, this.wallsLayer.height);
-
-    this.playerLabel = this.add.text(-50, -50, "this is you").setOrigin(0.5, 1);
-    this.playersConnectedText = this.add.text(20, 20, "");
-
     this.otherPlayers = this.physics.add.group();
     this.cursors = this.input.keyboard.addKeys({ up: "W", left: "A", down: "S", right: "D" });
+    this.playerLabel = this.add.text(-50, -50, "this is you").setOrigin(0.5, 1);
+    this.playersConnectedText = this.add.text(20, 20, "");
+    this.physics.world.setBounds(0, 0, 1024, 750);
+    this.input.mouse.disableContextMenu();
+
+    this.ores = this.physics.add.group({
+      classType: Ore,
+    });
+
+    this.ores.create(100, 100, "ore");
+    console.log(this.ores);
 
     // socket connection
     this.socket = io();
@@ -120,6 +129,28 @@ export default class MainScene extends Phaser.Scene {
       });
     });
 
+    this.socket.on("player mined", function (playerData) {
+      scene.otherPlayers.getChildren().forEach(function (otherPlayer) {
+        if (playerData.socketId === otherPlayer.socketId) {
+          let direction = ["left", "left_idle", "up", "down"].includes(playerData.keydown) ? "left" : "right";
+          otherPlayer.anims.play(`${direction}_mine`, true);
+        }
+      });
+    });
+
+    this.socket.on("player mine stopped", function (playerData) {
+      scene.otherPlayers.getChildren().forEach(function (otherPlayer) {
+        if (playerData.socketId === otherPlayer.socketId) {
+          let direction = ["left", "left_idle", "up", "down"].includes(playerData.keydown) ? "left" : "right";
+          if (!otherPlayer.anims.isPlaying) {
+          otherPlayer.anims.play(`${direction}_idle`, true);
+          }
+        }
+      });
+    });
+
+
+
     this.socket.emit("ready");
   }
 
@@ -130,51 +161,7 @@ export default class MainScene extends Phaser.Scene {
       this.playerLabel.x = this.player.x;
       this.playerLabel.y = this.player.y - 40;
 
-      //Camera Follow
-      this.cameras.main.startFollow(scene.player, true, 0.05, 0.05);
-
-      // const VELOCITY = 160; ORIGINAL
-      const VELOCITY = 300; //DEV
-
-      // idle
-      this.player.setVelocity(0);
-      let leftOrRight = ["left", "left_idle", "up", "down"].includes(scene.player.keydown)
-        ? "left_idle"
-        : "right_idle";
-      this.player.keydown = leftOrRight;
-
-      // horizontal movement
-      if (this.cursors.left.isDown) {
-        this.player.setVelocityX(-VELOCITY);
-        this.player.anims.play("left", true);
-        this.player.keydown = "left";
-      } else if (this.cursors.right.isDown) {
-        this.player.setVelocityX(VELOCITY);
-        this.player.anims.play("right", true);
-        this.player.keydown = "right";
-      }
-
-      // vertical movement
-      if (this.cursors.up.isDown) {
-        this.player.setVelocityY(-VELOCITY);
-        let leftOrRight = ["left", "left_idle", "up", "down"].includes(scene.player.keydown)
-          ? "left"
-          : "right";
-        this.player.anims.play(leftOrRight, true);
-        this.player.keydown = leftOrRight;
-      } else if (this.cursors.down.isDown) {
-        this.player.setVelocityY(VELOCITY);
-        let leftOrRight = ["left", "left_idle", "up", "down"].includes(scene.player.keydown)
-          ? "left"
-          : "right";
-        this.player.anims.play(leftOrRight, true);
-        this.player.keydown = leftOrRight;
-      }
-
-      // idle animation
-      if (this.player.body.velocity.x == 0 && this.player.body.velocity.y == 0) {
-        this.player.anims.play(leftOrRight, true);
-      }
+      this.player.update();
 
       // tell the server about movement
       let x = this.player.x;
@@ -185,6 +172,14 @@ export default class MainScene extends Phaser.Scene {
           y: scene.player.y,
           keydown: scene.player.keydown,
         });
+      }
+
+      if (this.input.activePointer.leftButtonDown()) {
+        this.socket.emit("player mining");
+      }
+
+      if (this.input.activePointer.leftButtonReleased()) {
+        this.socket.emit("player stop mining");
       }
 
       // save old position

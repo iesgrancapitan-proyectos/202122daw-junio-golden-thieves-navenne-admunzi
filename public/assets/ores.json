@@ -1,0 +1,67 @@
+{
+    "frames": [
+    {
+        "filename": "ore_3.png",
+        "frame": { "x": 3, "y": 3, "w": 15, "h": 13 },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": { "x": 0, "y": 0, "w": 15, "h": 13 },
+        "sourceSize": { "w": 15, "h": 13 }
+    },
+    {
+      "filename": "ore_5.png",
+      "frame": { "x": 19, "y": 3, "w": 16, "h": 15 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 16, "h": 15 },
+      "sourceSize": { "w": 16, "h": 15 }
+    },
+    {
+      "filename": "ore_6.png",
+      "frame": { "x": 36, "y": 2, "w": 15, "h": 16 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 15, "h": 16 },
+      "sourceSize": { "w": 15, "h": 16 }
+    },
+    {
+      "filename": "ore_7.png",
+      "frame": { "x": 55, "y": 7, "w": 26, "h": 23 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 26, "h": 23 },
+      "sourceSize": { "w": 26, "h": 23 }
+    },
+    {
+      "filename": "ore_4.png",
+      "frame": { "x": 4, "y": 19, "w": 14, "h": 14 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 14, "h": 14 },
+      "sourceSize": { "w": 14, "h": 14 }
+    },
+    {
+      "filename": "ore_2.png",
+      "frame": { "x": 20, "y": 20, "w": 15, "h": 14 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 15, "h": 14 },
+      "sourceSize": { "w": 15, "h": 14 }
+    },
+    {
+      "filename": "ore_1.png",
+      "frame": { "x": 37, "y": 23, "w": 12, "h": 9 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 12, "h": 9 },
+      "sourceSize": { "w": 12, "h": 9 }
+    }
+  ],
+  "meta": {
+    "app": "https://www.leshylabs.com/apps/sstool/",
+    "version": "Leshy SpriteSheet Tool v0.8.4",
+    "image": "spritesheet.png",
+    "size": { "w": 85, "h": 35 },
+    "scale": 1
+  }
+}
