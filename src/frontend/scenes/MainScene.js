@@ -1,5 +1,6 @@
 import io from "socket.io-client";
 import Player from "../objects/Player";
+import Ore from "../objects/Ore";
 
 export default class MainScene extends Phaser.Scene {
   constructor() {
@@ -21,6 +22,13 @@ export default class MainScene extends Phaser.Scene {
     this.otherPlayers = this.physics.add.group();
     this.cursors = this.input.keyboard.addKeys({ up: "W", left: "A", down: "S", right: "D" });
     this.input.mouse.disableContextMenu();
+
+    this.ores = this.physics.add.group({
+      classType: Ore,
+    });
+
+    this.ores.create(100, 100, "ore");
+    console.log(this.ores);
 
     // socket connection
     this.socket = io();
@@ -50,7 +58,6 @@ export default class MainScene extends Phaser.Scene {
     this.socket.on("player moved", function (playerData) {
       scene.otherPlayers.getChildren().forEach(function (otherPlayer) {
         if (playerData.socketId === otherPlayer.socketId) {
-          // console.log(playerData.keydown);
           otherPlayer.anims.play(playerData.keydown, true);
           otherPlayer.setPosition(playerData.x, playerData.y);
         }
@@ -70,7 +77,9 @@ export default class MainScene extends Phaser.Scene {
       scene.otherPlayers.getChildren().forEach(function (otherPlayer) {
         if (playerData.socketId === otherPlayer.socketId) {
           let direction = ["left", "left_idle", "up", "down"].includes(playerData.keydown) ? "left" : "right";
-           otherPlayer.anims.play(`${direction}_idle`, true);
+          if (!otherPlayer.anims.isPlaying) {
+          otherPlayer.anims.play(`${direction}_idle`, true);
+          }
         }
       });
     });
@@ -87,7 +96,7 @@ export default class MainScene extends Phaser.Scene {
       this.playerLabel.x = this.player.x;
       this.playerLabel.y = this.player.y - 40;
 
-      this.player.playAnimation();
+      this.player.update();
 
       // tell the server about movement
       let x = this.player.x;

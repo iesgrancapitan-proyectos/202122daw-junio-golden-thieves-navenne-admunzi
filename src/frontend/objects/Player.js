@@ -3,17 +3,34 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     super(scene, data.x, data.y, "player");
     scene.add.existing(this);
 
-    // Enable Physics
+    // enable physics
     scene.physics.world.enable(this);
 
-    this.setScale(2);
-
+    // data
     this.loginTime = data.loginTime;
     this.socketId = id;
     this.x = data.x;
     this.y = data.y;
     this.keydown = data.keydown;
+    this.miningCount = 0;
 
+    // range
+    this.range = scene.add.sprite(this.x, this.y, "range");
+    scene.physics.world.enable(this.range);
+    scene.physics.add.overlap(this.range, scene.ores, this.checkNear, () => {}, this);
+    this.range.setAlpha(0);
+    this.range.body.setSize(this.width + 50, this.height + 50, -5, 0);
+
+    // size
+    this.setScale(2);
+
+    // mining
+    this.on("animationcomplete-left_mine", () => {
+      console.log(this.miningCount++);
+    });
+    this.on("animationcomplete-right_mine", () => {
+      console.log(this.miningCount++);
+    });
 
     // Animations
 
@@ -26,7 +43,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         suffix: ".png",
         start: 1,
         end: 8,
-      })
+      }),
     });
 
     this.anims.create({
@@ -37,7 +54,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         suffix: ".png",
         start: 1,
         end: 8,
-      })
+      }),
     });
 
     this.anims.create({
@@ -48,9 +65,8 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         suffix: ".png",
         start: 1,
         end: 8,
-      })
+      }),
     });
-
 
     // Left
     this.anims.create({
@@ -61,7 +77,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         suffix: ".png",
         start: 1,
         end: 8,
-      })
+      }),
     });
 
     this.anims.create({
@@ -72,7 +88,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         suffix: ".png",
         start: 1,
         end: 8,
-      })
+      }),
     });
 
     this.anims.create({
@@ -83,11 +99,13 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         suffix: ".png",
         start: 1,
         end: 8,
-      })
+      }),
     });
   }
 
-  playAnimation() {
+  update() {
+    this.range.x = this.x;
+    this.range.y = this.y;
 
     const VELOCITY = 160;
 
@@ -126,6 +144,10 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
       this.anims.play(`${leftOrRight}_mine`, true);
     }
 
+    if (this.scene.input.activePointer.leftButtonReleased()) {
+      this.miningCount = 0;
+    }
+
     // idle animation
     if (this.body.velocity.x == 0 && this.body.velocity.y == 0 && !this.scene.input.activePointer.leftButtonDown()) {
       this.anims.play(`${leftOrRight}_idle`, true);
@@ -134,5 +156,11 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
 
   checkDirection() {
     return ["left", "left_idle", "up", "down"].includes(this.keydown) ? "left" : "right";
-  } 
+  }
+
+  checkNear(range, ore) {
+    if (this.miningCount > 2) {
+      ore.disableBody(true, true);
+    }
+  }
 }

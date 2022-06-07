@@ -1,13 +1,24 @@
 export default class Ore extends Phaser.Physics.Arcade.Sprite {
-    constructor(scene, data) {
-      super(scene, data.x, data.y, "ore");
-      scene.add.existing(this);
-  
-      this.setScale(2);
+    constructor(scene, x, y, key) {
+      super(scene, x, y, key);
 
-      this.x = data.x;
-      this.y = data.y;
-  
+      this.x = x;
+      this.y = y;
+      
+      this.frames = this.anims.generateFrameNames("ore", {
+        prefix: "ore_",
+        suffix: ".png",
+        start: 1,
+        end: 7,
+      });
+
+      // enable physics
+      scene.physics.world.enable(this);
+
+      this.setScale(2);
+      this.setFrame(`ore_${Phaser.Math.Between(1, 7)}.png`)
+
+      scene.add.existing(this);
   
       // Animations
   
@@ -15,12 +26,7 @@ export default class Ore extends Phaser.Physics.Arcade.Sprite {
       this.anims.create({
         key: "break",
         frameRate: 8,
-        frames: this.anims.generateFrameNames("ore", {
-          prefix: "gold_",
-          suffix: ".png",
-          start: 1,
-          end: 7,
-        })
+        frames: this.frames,
       });
     }
   }
