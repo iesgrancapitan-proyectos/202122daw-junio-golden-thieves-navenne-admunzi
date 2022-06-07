@@ -1,6 +1,5 @@
 import io from "socket.io-client";
 import Player from "../objects/Player";
-import { Mrpas } from 'mrpas'
 
 export default class MainScene extends Phaser.Scene {
   constructor() {
@@ -23,20 +22,21 @@ export default class MainScene extends Phaser.Scene {
     this.load.image("ore6", "assets/oregold/ore6.png")
     this.load.image("ore7", "assets/oregold/ore7.png")
 
+    this.load.image("fov1", "assets/fov-1.png")
   }
 
   create() {
     const scene = this;
 
     //Tiles Sets
-    const map = this.make.tilemap({ key: 'mine'})
-    const tileset = map.addTilesetImage('base-colour', 'tiles')
-    const tilesetUnderBridge = map.addTilesetImage('base-colour-under-bridge', 'tilesUnderBridge')
+    this.map = this.make.tilemap({ key: 'mine'})
+    const tileset = this.map.addTilesetImage('base-colour', 'tiles')
+    const tilesetUnderBridge = this.map.addTilesetImage('base-colour-under-bridge', 'tilesUnderBridge')
 
-    this.groundLayer = map.createLayer('ground', tileset)
-    map.createLayer('outline-ground', tileset)
-    map.createLayer('under-bridge', tilesetUnderBridge)
-    map.createLayer('bridge', tileset)
+    this.groundLayer = this.map.createLayer('ground', tileset)
+    this.map.createLayer('outline-ground', tileset)
+    this.map.createLayer('under-bridge', tilesetUnderBridge)
+    this.map.createLayer('bridge', tileset)
 
     // console.log(this.oreLayer) // give an array of sprites
     const AMOUNT_ORE = 600;
@@ -48,19 +48,38 @@ export default class MainScene extends Phaser.Scene {
 
     items.forEach(element => {
       do {
-        element.x = Math.floor(Math.random() * (3500 - -2700)) + -2700;
-        element.y = Math.floor(Math.random() * (1900 - -2000)) + -2000;
+        element.x = Math.floor(Math.random() * (6000 - 0)) + 0;
+        element.y = Math.floor(Math.random() * (4000 - 0)) + 0;
 
       } while (!this.groundLayer.getTileAtWorldXY(element.x, element.y));
     });
 
     this.ores = this.physics.add.staticGroup(items)
 
-    this.fallLayer = map.createLayer('fall', tileset)
+    this.fallLayer = this.map.createLayer('fall', tileset)
     this.fallLayer.setCollisionByProperty({ collides: true})
 
-    this.wallsLayer = map.createLayer('walls', tileset)
+    this.wallsLayer = this.map.createLayer('walls', tileset)
     this.wallsLayer.setCollisionByProperty({ collides: true})
+
+    //FOV
+    const width = this.groundLayer.width
+    const height = this.groundLayer.height
+
+    // make a RenderTexture that is the size of the screen
+    this.rtFOV = this.make.renderTexture({
+      width,
+      height
+    }, true)
+
+    // fill it with black
+    this.rtFOV.fill(0x000000, 1)
+
+    // draw the floorLayer into it
+    this.rtFOV.draw(this.groundLayer)
+
+    // set a dark blue tint
+    this.rtFOV.setTint(0x0a2948)
 
     //CHECK COLLIDES WALLS
       // const debugGraphicsWALLS = this.add.graphics().setAlpha(0.75);
@@ -130,8 +149,15 @@ export default class MainScene extends Phaser.Scene {
       this.playerLabel.x = this.player.x;
       this.playerLabel.y = this.player.y - 40;
 
+      //Update vision when player move
+      if (this.vision){
+        this.vision.x = this.player.x
+        this.vision.y = this.player.y
+      }
+
       //Camera Follow
       this.cameras.main.startFollow(scene.player, true, 0.05, 0.05);
+
 
       // const VELOCITY = 160; ORIGINAL
       const VELOCITY = 300; //DEV
@@ -210,4 +236,5 @@ export default class MainScene extends Phaser.Scene {
     this.otherPlayer.setTint(0x7cc78f);
     this.otherPlayers.add(this.otherPlayer);
   }
+
 }

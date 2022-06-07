@@ -1,6 +1,5 @@
 import "phaser";
 import MainScene from "./scenes/MainScene";
-import RandomPlacePlugin from 'phaser3-rex-plugins/plugins/randomplace-plugin.js';
 
 const DEFAULT_WIDTH = 2048;
 const DEFAULT_HEIGHT = 900;
@@ -19,9 +18,6 @@ const config = {
   physics: {
     default: "arcade",
     arcade: {
-      // gravity: {
-      //   y: 0,
-      // },
       debug: false,
     },
   },
