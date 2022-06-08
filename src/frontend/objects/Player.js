@@ -18,7 +18,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.y = data.y;
     this.keydown = data.keydown;
 
-    //Collides
+    // colliders
     scene.physics.add.collider(this, scene.wallsLayer);
     scene.physics.add.collider(this, scene.fallLayer);
     scene.physics.add.collider(this, scene.ores);
@@ -123,7 +123,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     //Camera Follow
     this.scene.cameras.main.startFollow(this, true, 0.05, 0.05);
 
-    // const VELOCITY = 160; ORIGINAL
+    // const VELOCITY = 160; //ORIGINAL
     const VELOCITY = 300; //DEV
 
     // idle

@@ -1,6 +1,5 @@
 import io from "socket.io-client";
 import Player from "../objects/Player";
-import { Mrpas } from 'mrpas'
 import Ore from "../objects/Ore";
 
 export default class MainScene extends Phaser.Scene {
@@ -13,24 +12,15 @@ export default class MainScene extends Phaser.Scene {
     this.load.atlas("player", "assets/player.png", "assets/player.json");
     this.load.image("tiles", "assets/base-colour.png")
     this.load.image("tilesUnderBridge", "assets/base-colour-under-bridge.png")
-    this.load.image("tilesOreVegetables", "assets/mena-vegetables-colour.png")
-    this.load.tilemapTiledJSON("mine", "tiled/terreno.json")
-
-    this.load.image("ore1", "assets/oregold/ore1.png")
-    this.load.image("ore2", "assets/oregold/ore2.png")
-    this.load.image("ore3", "assets/oregold/ore3.png")
-    this.load.image("ore4", "assets/oregold/ore4.png")
-    this.load.image("ore5", "assets/oregold/ore5.png")
-    this.load.image("ore6", "assets/oregold/ore6.png")
-    this.load.image("ore7", "assets/oregold/ore7.png")
-
+    this.load.image("tilesOreVegetables", "assets/ores-vegetables-colour.png")
+    this.load.tilemapTiledJSON("mine", "tiled/terrain.json")
     this.load.atlas("ore", "assets/ores.png", "assets/ores.json");
   }
 
   create() {
     const scene = this;
 
-    //Tiles Sets
+    // tilemap
     const map = this.make.tilemap({ key: 'mine'})
     const tileset = map.addTilesetImage('base-colour', 'tiles')
     const tilesetUnderBridge = map.addTilesetImage('base-colour-under-bridge', 'tilesUnderBridge')
@@ -40,29 +30,31 @@ export default class MainScene extends Phaser.Scene {
     map.createLayer('under-bridge', tilesetUnderBridge)
     map.createLayer('bridge', tileset)
 
-    // console.log(this.oreLayer) // give an array of sprites
-    const AMOUNT_ORE = 600;
-    let items = [];
-  
-    for (var i = 1; i <= AMOUNT_ORE; i++) {
-      items.push(this.add.image(0, 0, 'ore' + Math.floor((Math.random() * (7 - 1 + 1)) + 1)))
-    }
-
-    items.forEach(element => {
-      do {
-        element.x = Math.floor(Math.random() * (3500 - -2700)) + -2700;
-        element.y = Math.floor(Math.random() * (1900 - -2000)) + -2000;
-
-      } while (!this.groundLayer.getTileAtWorldXY(element.x, element.y));
+    this.ores = this.physics.add.group({
+      classType: Ore,
     });
 
-    this.ores = this.physics.add.staticGroup(items)
+    // console.log(this.oreLayer) // give an array of sprites
+    const ORES_AMOUNT = 600;
+    let oresList = Array.from({length: ORES_AMOUNT});
 
-    this.fallLayer = map.createLayer('fall', tileset)
-    this.fallLayer.setCollisionByProperty({ collides: true})
+    oresList.forEach(value => {
+      let x = -1;
+      let y = -1;
 
-    this.wallsLayer = map.createLayer('walls', tileset)
-    this.wallsLayer.setCollisionByProperty({ collides: true})
+      while (!this.groundLayer.getTileAtWorldXY(x, y)) {
+        x = Phaser.Math.Between(-2700, 3500);
+        y = Phaser.Math.Between(-2000, 1900);
+      }
+
+      let ore = this.ores.create(x, y, "ore");
+      ore.body.setImmovable();
+      ore.body.setAllowGravity(false);
+    });
+
+    this.fallLayer = map.createLayer('fall', tileset).setCollisionByProperty({ collides: true});
+    this.wallsLayer = map.createLayer('walls', tileset).setCollisionByProperty({ collides: true});
+
 
     //CHECK COLLIDES WALLS
       // const debugGraphicsWALLS = this.add.graphics().setAlpha(0.75);
@@ -87,13 +79,6 @@ export default class MainScene extends Phaser.Scene {
     this.playersConnectedText = this.add.text(20, 20, "");
     this.physics.world.setBounds(0, 0, 1024, 750);
     this.input.mouse.disableContextMenu();
-
-    this.ores = this.physics.add.group({
-      classType: Ore,
-    });
-
-    this.ores.create(100, 100, "ore");
-    console.log(this.ores);
 
     // socket connection
     this.socket = io();

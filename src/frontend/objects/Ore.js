@@ -15,7 +15,9 @@ export default class Ore extends Phaser.Physics.Arcade.Sprite {
       // enable physics
       scene.physics.world.enable(this);
 
-      this.setScale(2);
+      
+
+      this.setScale(1.5);
       this.setFrame(`ore_${Phaser.Math.Between(1, 7)}.png`)
 
       scene.add.existing(this);
