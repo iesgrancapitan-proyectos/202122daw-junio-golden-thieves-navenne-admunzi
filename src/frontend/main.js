@@ -3,8 +3,8 @@ import LobbyScene from "./scenes/LobbyScene";
 import MainScene from "./scenes/MainScene";
 import MenuScene from "./scenes/MenuScene";
 
-const DEFAULT_WIDTH = 900;
-const DEFAULT_HEIGHT = 700;
+const DEFAULT_WIDTH = 1280;
+const DEFAULT_HEIGHT = 720;
 
 const config = {
   backgroundColor: "#080e16",

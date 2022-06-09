@@ -6,7 +6,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     // enable physics
     scene.physics.world.enable(this);
 
-    scene.cameras.main.zoom = 1.5;
+    scene.cameras.main.zoom = 1.2;
 
     this.setScale(1.5);
     this.setBodySize(15,10).setOffset(5,15);

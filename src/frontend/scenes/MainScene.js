@@ -57,8 +57,8 @@ export default class MainScene extends Phaser.Scene {
       ore.body.setAllowGravity(false);
     });
 
-    this.fallLayer = map.createLayer('fall', tileset).setCollisionByProperty({ collides: true});
-    this.wallsLayer = map.createLayer('walls', tileset).setCollisionByProperty({ collides: true});
+    this.fallLayer = this.map.createLayer('fall', tileset).setCollisionByProperty({ collides: true});
+    this.wallsLayer = this.map.createLayer('walls', tileset).setCollisionByProperty({ collides: true});
 
 
     //FOV
