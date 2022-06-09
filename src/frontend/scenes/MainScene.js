@@ -6,7 +6,9 @@ export default class MainScene extends Phaser.Scene {
     super("MainScene");
   }
 
-  init(data) {}
+  init(data) {
+    
+  }
   preload() {
     this.load.atlas("player", "assets/player.png", "assets/player.json");
     this.load.image("tiles", "assets/base-colour.png")
@@ -23,6 +25,9 @@ export default class MainScene extends Phaser.Scene {
     this.load.image("ore7", "assets/oregold/ore7.png")
 
     this.load.image("fov1", "assets/fov-1.png")
+
+    this.load.image("abilityBreak", "assets/abilityBreak.png")
+    this.load.image("abilityStun", "assets/abilityStun.png")
   }
 
   create() {
@@ -48,8 +53,8 @@ export default class MainScene extends Phaser.Scene {
 
     items.forEach(element => {
       do {
-        element.x = Math.floor(Math.random() * (6000 - 0)) + 0;
-        element.y = Math.floor(Math.random() * (4000 - 0)) + 0;
+        element.x = Math.floor(Math.random() * 6000);
+        element.y = Math.floor(Math.random() * 4000);
 
       } while (!this.groundLayer.getTileAtWorldXY(element.x, element.y));
     });

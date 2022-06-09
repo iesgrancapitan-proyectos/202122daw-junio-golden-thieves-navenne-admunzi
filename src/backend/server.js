@@ -26,6 +26,9 @@ app.get("/assets/*", (req, res) =>{
 app.get("/tiled/*", (req, res) =>{
     res.sendFile(path.join(__dirname,"/../public/"+req.path))
 })
+app.get("/fonts/*", (req, res) =>{
+    res.sendFile(path.join(__dirname,"/../public/"+req.path))
+})
 
 // start game communication server (socket.io)
 clientConnection(io);
