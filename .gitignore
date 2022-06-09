@@ -1,2 +1,4 @@
 /node_modules
 package-lock.json
+/built-server/bundle-back.js
+/public/bundle-front.js

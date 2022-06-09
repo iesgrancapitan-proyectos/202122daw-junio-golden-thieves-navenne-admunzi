@@ -1,8 +1,10 @@
 import "phaser";
+import LobbyScene from "./scenes/LobbyScene";
 import MainScene from "./scenes/MainScene";
+import MenuScene from "./scenes/MenuScene";
 
-const DEFAULT_WIDTH = 2048;
-const DEFAULT_HEIGHT = 900;
+const DEFAULT_WIDTH = 900;
+const DEFAULT_HEIGHT = 700;
 
 const config = {
   backgroundColor: "#080e16",
@@ -13,16 +15,16 @@ const config = {
     width: DEFAULT_WIDTH,
     height: DEFAULT_HEIGHT,
   },
-  scene: [MainScene],
+  scene: [ MainScene],
   pixelArt: true,
   physics: {
     default: "arcade",
     arcade: {
-      // gravity: {
-      //   y: 0,
-      // },
       debug: false,
     },
+  },
+  dom: {
+    createContainer: true
   },
 };
 

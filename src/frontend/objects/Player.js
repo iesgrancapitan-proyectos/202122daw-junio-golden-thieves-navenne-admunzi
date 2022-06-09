@@ -45,6 +45,18 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
       console.log(this.miningCount++);
     });
 
+    //FOV
+    scene.vision = scene.make.image({
+      x: this.x,
+      y: this.y,
+      key: 'fov1',
+      add: false
+    })
+    scene.vision.scale = 10
+  
+    scene.rtFOV.mask = new Phaser.Display.Masks.BitmapMask(scene, scene.vision)
+    scene.rtFOV.mask.invertAlpha = true
+
     // Animations
 
     // Right

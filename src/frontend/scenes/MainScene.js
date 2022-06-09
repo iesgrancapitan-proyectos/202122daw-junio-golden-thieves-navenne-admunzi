@@ -7,7 +7,9 @@ export default class MainScene extends Phaser.Scene {
     super("MainScene");
   }
 
-  init(data) {}
+  init(data) {
+    
+  }
   preload() {
     this.load.atlas("player", "assets/player.png", "assets/player.json");
     this.load.image("tiles", "assets/base-colour.png")
@@ -15,20 +17,23 @@ export default class MainScene extends Phaser.Scene {
     this.load.image("tilesOreVegetables", "assets/ores-vegetables-colour.png")
     this.load.tilemapTiledJSON("mine", "tiled/terrain.json")
     this.load.atlas("ore", "assets/ores.png", "assets/ores.json");
+    this.load.image("fov1", "assets/fov-1.png")
+    this.load.image("abilityBreak", "assets/abilityBreak.png")
+    this.load.image("abilityStun", "assets/abilityStun.png")
   }
 
   create() {
     const scene = this;
 
-    // tilemap
-    const map = this.make.tilemap({ key: 'mine'})
-    const tileset = map.addTilesetImage('base-colour', 'tiles')
-    const tilesetUnderBridge = map.addTilesetImage('base-colour-under-bridge', 'tilesUnderBridge')
+    //  tilemap
+    this.map = this.make.tilemap({ key: 'mine'})
+    const tileset = this.map.addTilesetImage('base-colour', 'tiles')
+    const tilesetUnderBridge = this.map.addTilesetImage('base-colour-under-bridge', 'tilesUnderBridge')
 
-    this.groundLayer = map.createLayer('ground', tileset)
-    map.createLayer('outline-ground', tileset)
-    map.createLayer('under-bridge', tilesetUnderBridge)
-    map.createLayer('bridge', tileset)
+    this.groundLayer = this.map.createLayer('ground', tileset)
+    this.map.createLayer('outline-ground', tileset)
+    this.map.createLayer('under-bridge', tilesetUnderBridge)
+    this.map.createLayer('bridge', tileset)
 
     this.ores = this.physics.add.group({
       classType: Ore,
@@ -43,8 +48,8 @@ export default class MainScene extends Phaser.Scene {
       let y = -1;
 
       while (!this.groundLayer.getTileAtWorldXY(x, y)) {
-        x = Phaser.Math.Between(-2700, 3500);
-        y = Phaser.Math.Between(-2000, 1900);
+        x = Phaser.Math.Between(0, 600);
+        y = Phaser.Math.Between(0, 4000);
       }
 
       let ore = this.ores.create(x, y, "ore");
@@ -55,6 +60,25 @@ export default class MainScene extends Phaser.Scene {
     this.fallLayer = map.createLayer('fall', tileset).setCollisionByProperty({ collides: true});
     this.wallsLayer = map.createLayer('walls', tileset).setCollisionByProperty({ collides: true});
 
+
+    //FOV
+    const width = this.groundLayer.width
+    const height = this.groundLayer.height
+
+    // make a RenderTexture that is the size of the screen
+    this.rtFOV = this.make.renderTexture({
+      width,
+      height
+    }, true)
+
+    // fill it with black
+    this.rtFOV.fill(0x000000, 1)
+
+    // draw the floorLayer into it
+    this.rtFOV.draw(this.groundLayer)
+
+    // set a dark blue tint
+    this.rtFOV.setTint(0x0a2948)
 
     //CHECK COLLIDES WALLS
       // const debugGraphicsWALLS = this.add.graphics().setAlpha(0.75);
@@ -148,6 +172,12 @@ export default class MainScene extends Phaser.Scene {
 
       this.player.update();
 
+      //Update vision when player move
+      if (this.vision){
+        this.vision.x = this.player.x
+        this.vision.y = this.player.y
+      }
+
       // tell the server about movement
       let x = this.player.x;
       let y = this.player.y;
@@ -190,4 +220,5 @@ export default class MainScene extends Phaser.Scene {
     this.otherPlayer.setTint(0x7cc78f);
     this.otherPlayers.add(this.otherPlayer);
   }
+
 }
