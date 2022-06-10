@@ -35,8 +35,8 @@ export function gameCommunication(socket, currentPlayers) {
     return currentPlayers[socket.id] = {
       socketId: socket.id,
       loginTime: new Date().getTime(),
-      x: 0,
-      y: 0,
+      x: Math.floor(Math.random()*(3015 - 2985) + 2985),
+      y: Math.floor(Math.random()*(2015 - 1985) + 1985),
       keydown: "idle",
     };
   }
