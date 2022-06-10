@@ -20,6 +20,25 @@ export default class MainScene extends Phaser.Scene {
     this.load.image("fov1", "assets/fov-1.png")
     this.load.image("abilityBreak", "assets/abilityBreak.png")
     this.load.image("abilityStun", "assets/abilityStun.png")
+    this.load.bitmapFont("pixelFont", "fonts/pixel.png", "fonts/pixel.xml");
+  }
+
+  abilityBreakUpdateTimer(scene){
+    scene.abilityBreakText.setText(--scene.abilityBreakCounter);
+    if (scene.abilityBreakCounter == 0) {
+      scene.abilityBreakBt.setInteractive();
+      scene.abilityBreakText.setVisible(false);
+      scene.abilityBreakBt.clearTint();
+    }
+  }
+
+  abilityStunUpdateTimer(scene){
+    scene.abilityStunText.setText(--scene.abilityStunCounter);
+    if (scene.abilityStunCounter == 0) {
+      scene.abilityStunBt.setInteractive();
+      scene.abilityStunText.setVisible(false);
+      scene.abilityStunBt.clearTint();
+    }
   }
 
   create() {
@@ -48,7 +67,7 @@ export default class MainScene extends Phaser.Scene {
       let y = -1;
 
       while (!this.groundLayer.getTileAtWorldXY(x, y)) {
-        x = Phaser.Math.Between(0, 600);
+        x = Phaser.Math.Between(0, 6000);
         y = Phaser.Math.Between(0, 4000);
       }
 
@@ -80,6 +99,30 @@ export default class MainScene extends Phaser.Scene {
     // set a dark blue tint
     this.rtFOV.setTint(0x0a2948)
 
+    // draw abilities buttom and text
+    this.abilityBreakText = this.add.bitmapText(583, 585, 'pixelFont', "", 30, 1).setDropShadow(3, 3, "#000", 1).setScrollFactor(0).setDepth(2);
+    this.abilityBreakBt = this.add.image(600, 600 , 'abilityBreak').setScrollFactor(0).setScale(1.65).setInteractive().setDepth(1);;
+
+    // add event click to abilityBreakBt
+    this.abilityBreakBt.on("pointerup",()=>{
+      scene.abilityBreakCounter = 30;
+      scene.abilityBreakBtTimer = this.time.addEvent({ delay: 1000, repeat: 29, callback: this.abilityBreakUpdateTimer, args: [scene]})
+      scene.abilityBreakBt.setTint(0x363636).removeInteractive();
+      scene.abilityBreakText.setVisible(true);
+    })
+
+    // draw abilities buttom and text
+    this.abilityStunText = this.add.bitmapText(663, 585, 'pixelFont', "", 30, 1).setDropShadow(3, 3, "#000", 1).setScrollFactor(0).setDepth(2);
+    this.abilityStunBt = this.add.image(680, 600 , 'abilityStun').setScrollFactor(0).setScale(1.65).setInteractive().setDepth(1);;
+
+    // add event click abilityStunBt
+    this.abilityStunBt.on("pointerup",()=>{
+      scene.abilityStunCounter = 30;
+      scene.abilityStunBtTimer = this.time.addEvent({ delay: 1000, repeat: 29, callback: this.abilityStunUpdateTimer, args: [scene]})
+      scene.abilityStunBt.setTint(0x363636).removeInteractive();
+      scene.abilityStunText.setVisible(true);
+    })
+    
     //CHECK COLLIDES WALLS
       // const debugGraphicsWALLS = this.add.graphics().setAlpha(0.75);
       // this.wallsLayer.renderDebug(debugGraphicsWALLS, {
@@ -165,6 +208,12 @@ export default class MainScene extends Phaser.Scene {
 
   update() {
     const scene = this;
+
+    // this.abilityBreakText.value = this.abilityBreakBtCounter.getProgress().toString()
+    // if (scene.abilityBreakBtCounter) {
+    //   scene.abilityBreakText.setText(scene.abilityBreakBtCounter.getProgress().toString());
+    //   console.log(scene.abilityBreakText);
+    // }
 
     if (this.player) {
       this.playerLabel.x = this.player.x;
