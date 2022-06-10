@@ -48,7 +48,7 @@ export default class MainScene extends Phaser.Scene {
       let y = -1;
 
       while (!this.groundLayer.getTileAtWorldXY(x, y)) {
-        x = Phaser.Math.Between(0, 600);
+        x = Phaser.Math.Between(0, 6000);
         y = Phaser.Math.Between(0, 4000);
       }
 
