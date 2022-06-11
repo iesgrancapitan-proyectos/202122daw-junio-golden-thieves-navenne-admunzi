@@ -46,7 +46,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     });
 
     //FOV
-    scene.vision = scene.make.image({
+/*     scene.vision = scene.make.image({
       x: this.x,
       y: this.y,
       key: 'fov1',
@@ -55,7 +55,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     scene.vision.scale = 10
   
     scene.rtFOV.mask = new Phaser.Display.Masks.BitmapMask(scene, scene.vision)
-    scene.rtFOV.mask.invertAlpha = true
+    scene.rtFOV.mask.invertAlpha = true */
 
     // Animations
 

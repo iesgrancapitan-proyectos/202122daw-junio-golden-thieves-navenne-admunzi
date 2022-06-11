@@ -5,39 +5,50 @@ export default class MenuScene extends Phaser.Scene {
 
     init(data) {}
     preload() {
-        this.load.image("background", "assets/MenuScene/Background.png")
-        this.load.html('nameform', 'assets/MenuScene/text/nameform.html');
+        this.load.image("background", "assets/MenuScene/background.png")
+        this.load.html('nameform', 'assets/MenuScene/nameform.html');
         this.load.bitmapFont("pixelFont", "fonts/pixel.png", "fonts/pixel.xml");
+        this.load.atlas("player", "assets/player.png", "assets/player.json");
     }
 
     create() {
         const MenuScene = this;
-        MenuScene.add.image(0, -80, 'background').setOrigin(0).setDepth(0);
+        const WIDTH = this.renderer.width;
+        const HEIGHT = this.renderer.height;
+        const FONT_SIZE_LARGE = 100;
+        const FONT_SIZE_MED = 50;
+        const FONT_SIZE_SMALL = 25;
 
-        MenuScene.add.bitmapText(MenuScene.renderer.height / 2 - 90, MenuScene.renderer.height * 0.10, 'pixelFont', "Golden\nThieves", 100, 1)
-        .setDropShadow(10, 10, "#000", 1);
+        this.add.image(WIDTH / 2, HEIGHT / 2, 'background').setDepth(0);
 
-        let playButtom = MenuScene.add.bitmapText(MenuScene.renderer.height / 2 + 65, MenuScene.renderer.height / 2 + 40, 'pixelFont', "Play", 50, 1)
-        .setDropShadow(5, 5, "#000", 1).setAlpha(0.5);
+        this.createText(0.2, "Golden\nThieves", FONT_SIZE_LARGE, true, 10)
 
-        let howToPlayButtom = MenuScene.add.bitmapText(MenuScene.renderer.height / 2 + 40, MenuScene.renderer.height / 2 + 120, 'pixelFont', "How To\nPlay", 50, 1)
-        .setDropShadow(5, 5, "#000", 1);
+        const playButton = this.createText(0.7, "Play", FONT_SIZE_MED, true, 5).setAlpha(0.7);
+        const howToPlayButton = this.createText(0.8, "How To Play", FONT_SIZE_MED, true, 5)
     
-        playButtom.setInteractive();
+        playButton.setInteractive();
+        howToPlayButton.setInteractive();
 
-        howToPlayButtom.setInteractive();
-        howToPlayButtom.on("pointerup",()=>{
-            console.log("How to play");
+        howToPlayButton.on("pointerover", function() {
+            this.setScale(1.1);
+        });
+
+        howToPlayButton.on("pointerout", function(){
+            this.setScale(1);
+        });
+
+        howToPlayButton.on("pointerup", function() {
+            console.log("How to play"); // to do 
         })
 
-        var text = this.add.text(MenuScene.renderer.height / 2 + 100, MenuScene.renderer.height -75, 'Please enter your name', { color: 'white', fontSize: '20px '});
+        const text = this.createText(0.42, 'Please enter your name', FONT_SIZE_SMALL, false);
 
-        var element = MenuScene.add.dom(MenuScene.renderer.height, MenuScene.renderer.height -30).createFromCache('nameform');
-        element.addListener('click');
+        const nameForm = this.add.dom(WIDTH / 2, HEIGHT * 0.5).createFromCache('nameform');
+        nameForm.addListener('click');
 
-        element.on('click', function (event) {
+        nameForm.on('click', function (event) {
     
-            if (event.target.name === 'playButton'){
+            if (event.target.name === 'sendButton'){
                 var inputText = this.getChildByName('nameField');
 
                 //  Have they entered anything?
@@ -49,12 +60,45 @@ export default class MenuScene extends Phaser.Scene {
                     this.setVisible(false);
                     text.setVisible(false);
 
-                    //  PlayButtom remove alpha and add event
-                    playButtom.setAlpha(1)
-                    playButtom.on("pointerup",()=>{
-                        MenuScene.scene.start("LobbyScene", inputText.value);
-                    })
-                }else{
+                    // replacement text
+                    let miner = MenuScene.add.sprite(WIDTH / 2, HEIGHT / 2 + 40, "player").setScale(2);
+                    miner.anims.create({
+                        key: "left_mine",
+                        frameRate: 8,
+                        repeat: -1,
+                        frames: miner.anims.generateFrameNames("player", {
+                          prefix: "left_mine_",
+                          suffix: ".png",
+                          start: 1,
+                          end: 8,
+                        }),
+                      });
+                      miner.anims.play("left_mine");
+                      MenuScene.createText(0.42, `Hey ${inputText.value}\n let's get some gold...`, FONT_SIZE_SMALL, false);
+
+                    //  playButton flash and add event
+                    this.scene.tweens.add({
+                        targets: playButton,
+                        alpha: 0.2,
+                        duration: 350,
+                        ease: 'Power3',
+                        yoyo: true
+                    });
+                    playButton.setAlpha(1);
+
+                    playButton.on("pointerover", function() {
+                        this.setScale(1.1);
+                    });
+
+                    playButton.on("pointerout", function() {
+                        this.setScale(1);
+                    });
+
+                    playButton.on("pointerup", function() {
+                        MenuScene.scene.start("MainScene", inputText.value);
+                    });
+
+                } else {
                     //  Flash the prompt
                     this.scene.tweens.add({
                         targets: text,
@@ -72,5 +116,12 @@ export default class MenuScene extends Phaser.Scene {
 
     }
 
+    createText(heightFactor, text, fontSize, shadow, shadowOffset) {
+        let bitmapText = this.add.bitmapText(this.renderer.width / 2, this.renderer.height * heightFactor, 'pixelFont', text, fontSize, 1).setOrigin(0.5);
+        if (shadow) {
+            bitmapText.setDropShadow(shadowOffset, shadowOffset, "#000", 1);
+        }
+        return bitmapText;
+    }
 }
   

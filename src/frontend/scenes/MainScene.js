@@ -25,8 +25,14 @@ export default class MainScene extends Phaser.Scene {
   create() {
     const scene = this;
 
+    // socket connection
+    this.socket = io();
+
+    // launch lobby
+    this.scene.launch("LobbyScene", {socket: scene.socket});
+
     //  tilemap
-    this.map = this.make.tilemap({ key: 'mine'})
+    /* this.map = this.make.tilemap({ key: 'mine'})
     const tileset = this.map.addTilesetImage('base-colour', 'tiles')
     const tilesetUnderBridge = this.map.addTilesetImage('base-colour-under-bridge', 'tilesUnderBridge')
 
@@ -39,7 +45,6 @@ export default class MainScene extends Phaser.Scene {
       classType: Ore,
     });
 
-    // console.log(this.oreLayer) // give an array of sprites
     const ORES_AMOUNT = 600;
     let oresList = Array.from({length: ORES_AMOUNT});
 
@@ -59,10 +64,10 @@ export default class MainScene extends Phaser.Scene {
 
     this.fallLayer = this.map.createLayer('fall', tileset).setCollisionByProperty({ collides: true});
     this.wallsLayer = this.map.createLayer('walls', tileset).setCollisionByProperty({ collides: true});
-
+ */
 
     //FOV
-    const width = this.groundLayer.width
+/*     const width = this.groundLayer.width
     const height = this.groundLayer.height
 
     // make a RenderTexture that is the size of the screen
@@ -78,7 +83,7 @@ export default class MainScene extends Phaser.Scene {
     this.rtFOV.draw(this.groundLayer)
 
     // set a dark blue tint
-    this.rtFOV.setTint(0x0a2948)
+    this.rtFOV.setTint(0x0a2948) */
 
     //CHECK COLLIDES WALLS
       // const debugGraphicsWALLS = this.add.graphics().setAlpha(0.75);
@@ -96,16 +101,13 @@ export default class MainScene extends Phaser.Scene {
       //   faceColor: new Phaser.Display.Color(40, 39, 37, 255) // Color of colliding face edges
       // });
 
-    this.physics.world.setBounds(0, 0, this.wallsLayer.width, this.wallsLayer.height);
+    //this.physics.world.setBounds(0, 0, this.wallsLayer.width, this.wallsLayer.height);
     this.otherPlayers = this.physics.add.group();
     this.cursors = this.input.keyboard.addKeys({ up: "W", left: "A", down: "S", right: "D" });
     this.playerLabel = this.add.text(-50, -50, "this is you").setOrigin(0.5, 1);
     this.playersConnectedText = this.add.text(20, 20, "");
     this.physics.world.setBounds(0, 0, 1024, 750);
     this.input.mouse.disableContextMenu();
-
-    // socket connection
-    this.socket = io();
 
     this.socket.on("greeting", (currentPlayers) => {
       Object.keys(currentPlayers).forEach(function (id) {
@@ -172,7 +174,7 @@ export default class MainScene extends Phaser.Scene {
 
       this.player.update();
 
-      //Update vision when player move
+      // update vision when player moves
       if (this.vision){
         this.vision.x = this.player.x
         this.vision.y = this.player.y
