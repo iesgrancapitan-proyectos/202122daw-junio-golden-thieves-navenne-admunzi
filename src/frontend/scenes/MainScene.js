@@ -11,15 +11,19 @@ export default class MainScene extends Phaser.Scene {
     
   }
   preload() {
+    this.load.bitmapFont("pixelFont", "fonts/pixel.png", "fonts/pixel.xml");
+
     this.load.atlas("player", "assets/player.png", "assets/player.json");
     this.load.image("tiles", "assets/base-colour.png")
     this.load.image("tilesUnderBridge", "assets/base-colour-under-bridge.png")
     this.load.image("tilesOreVegetables", "assets/ores-vegetables-colour.png")
+    this.load.image("tilesMiscObjects", "assets/misc-objects.png")
     this.load.tilemapTiledJSON("mine", "tiled/terrain.json")
     this.load.atlas("ore", "assets/ores.png", "assets/ores.json");
     this.load.image("fov1", "assets/fov-1.png")
     this.load.image("abilityBreak", "assets/abilityBreak.png")
     this.load.image("abilityStun", "assets/abilityStun.png")
+    this.load.image("guiGold", "assets/guiGold.png")
   }
 
   create() {
@@ -29,6 +33,7 @@ export default class MainScene extends Phaser.Scene {
     this.map = this.make.tilemap({ key: 'mine'})
     const tileset = this.map.addTilesetImage('base-colour', 'tiles')
     const tilesetUnderBridge = this.map.addTilesetImage('base-colour-under-bridge', 'tilesUnderBridge')
+    const tilesetMiscObjects = this.map.addTilesetImage('misc-objects', 'tilesMiscObjects')
 
     this.groundLayer = this.map.createLayer('ground', tileset)
     this.map.createLayer('outline-ground', tileset)
@@ -39,15 +44,28 @@ export default class MainScene extends Phaser.Scene {
       classType: Ore,
     });
 
+    this.fallLayer = this.map.createLayer('fall', tileset).setCollisionByProperty({ collides: true});
+    this.wallsLayer = this.map.createLayer('walls', tileset).setCollisionByProperty({ collides: true});
+    this.interactable_objectsLayer = this.map.createLayer('interactable-objects', tilesetMiscObjects).setCollisionByProperty({ collides: true});
+
+    // add gui gold
+    this.add.image(230,130,"guiGold").setScrollFactor(0).setDepth(1);
+    this.goldPlayerGui = this.add.bitmapText(190,81, 'pixelFont', "2134", 25, 1).setDropShadow(4, 4, "#000", 1).setScrollFactor(0).setDepth(2);
+    this.goldTeamNormalGui = this.add.bitmapText(170,117, 'pixelFont', "2000 / 2000", 25, 1).setDropShadow(4, 4, "#000", 1).setScrollFactor(0).setDepth(2);
+    this.goldTeamImpostorGui = this.add.bitmapText(170,154, 'pixelFont', "2000 / 2000", 25, 1).setDropShadow(4, 4, "#000", 1).setScrollFactor(0).setDepth(2);
+
     // console.log(this.oreLayer) // give an array of sprites
     const ORES_AMOUNT = 600;
     let oresList = Array.from({length: ORES_AMOUNT});
+    
+    // area dont spawn ores
+    let areaMainSpawn = new Phaser.Geom.Rectangle(2820, 1920, 450, 300);
 
     oresList.forEach(value => {
       let x = -1;
       let y = -1;
 
-      while (!this.groundLayer.getTileAtWorldXY(x, y)) {
+      while (!this.groundLayer.getTileAtWorldXY(x, y) || areaMainSpawn.contains(x, y)) {
         x = Phaser.Math.Between(0, 6000);
         y = Phaser.Math.Between(0, 4000);
       }
@@ -57,10 +75,37 @@ export default class MainScene extends Phaser.Scene {
       ore.body.setAllowGravity(false);
     });
 
-    this.fallLayer = this.map.createLayer('fall', tileset).setCollisionByProperty({ collides: true});
-    this.wallsLayer = this.map.createLayer('walls', tileset).setCollisionByProperty({ collides: true});
+    // create vote object
+    this.voteObject = this.add.sprite(3016, 2000, "voteObject");
+    this.physics.world.enable(this.voteObject);
+    this.voteObject.setAlpha(0);
+    this.voteObjectKeyEText = this.add.bitmapText(3006, 1935, 'pixelFont', "E", 35, 1).setDropShadow(4, 4, "#000", 1).setVisible(false);
 
+    // create anvil object
+    this.anvilObject = this.add.sprite(2880, 2065, "anvil");
+    this.physics.world.enable(this.anvilObject);
+    this.anvilObject.setAlpha(0);
+    this.anvilObjectKeyEText = this.add.bitmapText(2870, 2015, 'pixelFont', "E", 35, 1).setDropShadow(4, 4, "#000", 1).setVisible(false);
+    
+    // create minecartGeneral object
+    this.minecartGeneralObject = this.add.sprite(3070, 2125, "minecartGeneral");
+    this.physics.world.enable(this.minecartGeneralObject);
+    this.minecartGeneralObject.setAlpha(0);
+    this.minecartGeneralObjectKeyEText = this.add.bitmapText(3060, 2078, 'pixelFont', "E", 35, 1).setDropShadow(4, 4, "#000", 1).setVisible(false);
+    
+    // create minecartImpostor object
+    this.minecartImpostorObject = this.add.sprite(3390, 2030, "minecartImpostor");
+    this.physics.world.enable(this.minecartImpostorObject);
+    this.minecartImpostorObject.setAlpha(0);
+    this.minecartImpostorObjectKeyEText = this.add.bitmapText(3380, 1985, 'pixelFont', "E", 35, 1).setDropShadow(4, 4, "#000", 1).setVisible(false);
 
+    // create button jail object
+    this.buttonJailObject = this.add.sprite(2950, 2185, "buttonJailObject");
+    this.physics.world.enable(this.buttonJailObject);
+    this.buttonJailObject.setAlpha(0);
+    this.buttonJailObjectKeyEText = this.add.bitmapText(2940, 2145, 'pixelFont', "E", 35, 1).setDropShadow(4, 4, "#000", 1).setVisible(false);
+    
+    this.keyE = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
     //FOV
     const width = this.groundLayer.width
     const height = this.groundLayer.height
@@ -71,14 +116,14 @@ export default class MainScene extends Phaser.Scene {
       height
     }, true)
 
-    // fill it with black
-    this.rtFOV.fill(0x000000, 1)
+      // fill it with black
+      this.rtFOV.fill(0x000000, 1)
 
-    // draw the floorLayer into it
-    this.rtFOV.draw(this.groundLayer)
+      // draw the floorLayer into it
+      this.rtFOV.draw(this.groundLayer)
 
-    // set a dark blue tint
-    this.rtFOV.setTint(0x0a2948)
+      // set a dark blue tint
+      this.rtFOV.setTint(0x0a2948)
 
     //CHECK COLLIDES WALLS
       // const debugGraphicsWALLS = this.add.graphics().setAlpha(0.75);
@@ -98,7 +143,7 @@ export default class MainScene extends Phaser.Scene {
 
     this.physics.world.setBounds(0, 0, this.wallsLayer.width, this.wallsLayer.height);
     this.otherPlayers = this.physics.add.group();
-    this.cursors = this.input.keyboard.addKeys({ up: "W", left: "A", down: "S", right: "D" });
+    this.cursors = this.input.keyboard.addKeys({ up: "W", left: "A", down: "S", right: "D" , interact: "E"});
     this.playerLabel = this.add.text(-50, -50, "this is you").setOrigin(0.5, 1);
     this.playersConnectedText = this.add.text(20, 20, "");
     this.physics.world.setBounds(0, 0, 1024, 750);
@@ -158,6 +203,12 @@ export default class MainScene extends Phaser.Scene {
       });
     });
 
+    this.socket.on("vote panel", function (playerData) {
+      scene.otherPlayers.getChildren().forEach(function (otherPlayer) {
+        scene.scene.launch('VoteScene',this);
+
+      });
+    });
 
 
     this.socket.emit("ready");
@@ -171,6 +222,21 @@ export default class MainScene extends Phaser.Scene {
       this.playerLabel.y = this.player.y - 40;
 
       this.player.update();
+
+      // check if player leave vote area
+      this.player.checkVoteObjectOverlap(scene,this.player,scene.voteObject); 
+  
+      // check if player leave anvil
+      this.player.checkAnvilObjectOverlap(scene,this.player,scene.anvilObject);
+
+      // check if player leave minecart General
+      this.player.checkminecartGeneralObjectOverlap(scene,this.player,scene.minecartGeneralObject); 
+
+      // check if player leave minecart Impostor
+      this.player.checkminecartImpostorObjectOverlap(scene,this.player,scene.minecartImpostorObject); 
+
+      // check if player leave minecart Impostor
+      this.player.checkButtonJailObjectOverlap(scene,this.player,scene.buttonJailObject); 
 
       //Update vision when player move
       if (this.vision){
@@ -210,7 +276,6 @@ export default class MainScene extends Phaser.Scene {
   addPlayer(id, playerData) {
     this.player = new Player(this, id, playerData);
     this.player.setBounce(0.2);
-    // this.player.setCollideWorldBounds(true);
   }
 
   // add any additional players

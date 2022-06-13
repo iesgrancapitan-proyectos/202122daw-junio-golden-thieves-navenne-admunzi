@@ -16,6 +16,11 @@ export function gameCommunication(socket, currentPlayers) {
     socket.broadcast.emit("player moved", currentPlayers[socket.id]);
   });
 
+  // when a player opens a vote
+  socket.on("vote panels", function () {
+    socket.broadcast.emit("vote panel", currentPlayers);
+  });
+
   // when a player mines, play animation
   socket.on("player mining", function () {
     socket.broadcast.emit("player mined", currentPlayers[socket.id]);
