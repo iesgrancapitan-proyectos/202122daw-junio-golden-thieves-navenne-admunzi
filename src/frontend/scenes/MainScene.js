@@ -68,7 +68,7 @@ export default class MainScene extends Phaser.Scene {
     this.wallsLayer = this.map.createLayer('walls', tileset).setCollisionByProperty({ collides: true});
     this.interactable_objectsLayer = this.map.createLayer('interactable-objects', tilesetMiscObjects).setCollisionByProperty({ collides: true});
 
-    // add gui gold
+    // gui gold
     this.add.image(230,130,"guiGold").setScrollFactor(0).setDepth(1);
     this.goldPlayerGui = this.add.bitmapText(190,81, 'pixelFont', "2134", 25, 1).setDropShadow(4, 4, "#000", 1).setScrollFactor(0).setDepth(2);
     this.goldTeamNormalGui = this.add.bitmapText(170,117, 'pixelFont', "2000 / 2000", 25, 1).setDropShadow(4, 4, "#000", 1).setScrollFactor(0).setDepth(2);
@@ -167,6 +167,13 @@ export default class MainScene extends Phaser.Scene {
       scene.abilityStunBtTimer = this.time.addEvent({ delay: 1000, repeat: 29, callback: this.abilityStunUpdateTimer, args: [scene]})
       scene.abilityStunBt.setTint(0x363636).removeInteractive();
       scene.abilityStunText.setVisible(true);
+
+      //overlap players
+      scene.otherPlayers.children.each(function(player) {
+        if(scene.checkOverlapPlayers(scene.player.range, player, scene)){
+          console.log("dentro");
+        }
+      }, this);
     })
     
     //CHECK COLLIDES WALLS
@@ -336,4 +343,11 @@ export default class MainScene extends Phaser.Scene {
     this.otherPlayers.add(this.otherPlayer);
   }
 
+  abilitieStun(){
+    console.log("Tira habilidad");
+  }
+
+  checkOverlapPlayers(range, otherPlayer, scene) {
+    return Phaser.Geom.Intersects.RectangleToRectangle(range.getBounds(), otherPlayer.getBounds());
+  }
 }
