@@ -1,3 +1,4 @@
+import createText from "../functions";
 export default class MenuScene extends Phaser.Scene {
     constructor() {
       super("MenuScene");
@@ -21,13 +22,13 @@ export default class MenuScene extends Phaser.Scene {
 
         this.add.image(WIDTH / 2, HEIGHT / 2, 'background').setDepth(0);
 
-        this.createText(0.2, "Golden\nThieves", FONT_SIZE_LARGE, true, 10)
+        createText(this, 0.2, "Golden\nThieves", FONT_SIZE_LARGE, true, 10)
 
-        const playButton = this.createText(0.7, "Play", FONT_SIZE_MED, true, 5).setAlpha(0.7);
-        const howToPlayButton = this.createText(0.8, "How To Play", FONT_SIZE_MED, true, 5)
+        const playButton = createText(this, 0.7, "Play", FONT_SIZE_MED, true, 5).setAlpha(0.7);
+        const howToPlayButton = createText(this, 0.8, "How To Play", FONT_SIZE_MED, true, 5)
     
-        playButton.setInteractive();
-        howToPlayButton.setInteractive();
+        playButton.setInteractive({ useHandCursor: true  });
+        howToPlayButton.setInteractive({ useHandCursor: true  });
 
         howToPlayButton.on("pointerover", function() {
             this.setScale(1.1);
@@ -41,7 +42,7 @@ export default class MenuScene extends Phaser.Scene {
             console.log("How to play"); // to do 
         })
 
-        const text = this.createText(0.42, 'Please enter your name', FONT_SIZE_SMALL, false);
+        const text = createText(this, 0.42, 'Please enter your name', FONT_SIZE_SMALL, false);
 
         const nameForm = this.add.dom(WIDTH / 2, HEIGHT * 0.5).createFromCache('nameform');
         nameForm.addListener('click');
@@ -74,7 +75,7 @@ export default class MenuScene extends Phaser.Scene {
                         }),
                       });
                       miner.anims.play("left_mine");
-                      MenuScene.createText(0.42, `Hey ${inputText.value}\n let's get some gold...`, FONT_SIZE_SMALL, false);
+                      createText(MenuScene, 0.42, `Hey ${inputText.value}\n let's get some gold...`, FONT_SIZE_SMALL, false);
 
                     //  playButton flash and add event
                     this.scene.tweens.add({
@@ -95,7 +96,7 @@ export default class MenuScene extends Phaser.Scene {
                     });
 
                     playButton.on("pointerup", function() {
-                        MenuScene.scene.start("MainScene", inputText.value);
+                        MenuScene.scene.start("LobbyScene", { name: inputText.value });
                     });
 
                 } else {
@@ -114,14 +115,6 @@ export default class MenuScene extends Phaser.Scene {
   
     update() {
 
-    }
-
-    createText(heightFactor, text, fontSize, shadow, shadowOffset) {
-        let bitmapText = this.add.bitmapText(this.renderer.width / 2, this.renderer.height * heightFactor, 'pixelFont', text, fontSize, 1).setOrigin(0.5);
-        if (shadow) {
-            bitmapText.setDropShadow(shadowOffset, shadowOffset, "#000", 1);
-        }
-        return bitmapText;
     }
 }
   

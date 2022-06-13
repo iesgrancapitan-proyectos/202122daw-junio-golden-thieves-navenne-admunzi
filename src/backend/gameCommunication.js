@@ -9,11 +9,13 @@ export function gameCommunication(socket, currentPlayers) {
 
   // when a player moves, update the player data
   socket.on("player movement", function (data) {
-    currentPlayers[socket.id].x = data.x;
-    currentPlayers[socket.id].y = data.y;
-    currentPlayers[socket.id].keydown = data.keydown;
-    // emit a message to all players about the player that moved
-    socket.broadcast.emit("player moved", currentPlayers[socket.id]);
+    if (currentPlayers[socket.id] && data) {
+      currentPlayers[socket.id].x = data.x;
+      currentPlayers[socket.id].y = data.y;
+      currentPlayers[socket.id].keydown = data.keydown;
+      // emit a message to all players about the player that moved
+      socket.broadcast.emit("player moved", currentPlayers[socket.id]);
+    }
   });
 
   // when a player mines, play animation
@@ -25,19 +27,4 @@ export function gameCommunication(socket, currentPlayers) {
   socket.on("player stop mining", function () {
     socket.broadcast.emit("player mine stopped", currentPlayers[socket.id]);
   });
-
-  /**
-   * @function createNewPlayer
-   * @description Creates a new player
-   * @param {*} socket - the socket connection
-   */
-  function createNewPlayer(currentPlayers, socket) {
-    return currentPlayers[socket.id] = {
-      socketId: socket.id,
-      loginTime: new Date().getTime(),
-      x: Math.floor(Math.random()*(3015 - 2985) + 2985),
-      y: Math.floor(Math.random()*(2015 - 1985) + 1985),
-      keydown: "idle",
-    };
-  }
 }

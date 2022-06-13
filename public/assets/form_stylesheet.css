@@ -1,5 +1,4 @@
-<style>
-    input {
+input {
     width: 50px;
     border: 5px solid white;
     padding: 0;
@@ -35,9 +34,4 @@ input.button {
 
 input.button:hover {
     background-color: #c7ffc762;
-    cursor: pointer;
-    cursor: hand;
 }
-</style>
-<input type="text" class="field" name="nameField" autocomplete="off">
-<input type="button" class="button" name="sendButton" value="&#9654;">

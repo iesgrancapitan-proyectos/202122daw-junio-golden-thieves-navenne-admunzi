@@ -1,4 +1,3 @@
-import io from "socket.io-client";
 import Player from "../objects/Player";
 import Ore from "../objects/Ore";
 
@@ -8,7 +7,7 @@ export default class MainScene extends Phaser.Scene {
   }
 
   init(data) {
-    
+    this.socket = data.socket;
   }
   preload() {
     this.load.atlas("player", "assets/player.png", "assets/player.json");
@@ -24,12 +23,6 @@ export default class MainScene extends Phaser.Scene {
 
   create() {
     const scene = this;
-
-    // socket connection
-    this.socket = io();
-
-    // launch lobby
-    this.scene.launch("LobbyScene", {socket: scene.socket});
 
     //  tilemap
     /* this.map = this.make.tilemap({ key: 'mine'})
@@ -191,14 +184,14 @@ export default class MainScene extends Phaser.Scene {
         });
       }
 
-      if (this.input.activePointer.leftButtonDown()) {
+      /* if (this.input.activePointer.leftButtonDown()) {
         this.socket.emit("player mining");
       }
 
       if (this.input.activePointer.leftButtonReleased()) {
         this.socket.emit("player stop mining");
       }
-
+ */
       // save old position
       this.player.oldPosition = {
         x: this.player.x,

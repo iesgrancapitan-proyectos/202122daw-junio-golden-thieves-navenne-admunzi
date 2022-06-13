@@ -168,14 +168,14 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     }
 
     // mining
-    if (this.scene.input.activePointer.leftButtonDown()) {
+    /* if (this.scene.input.activePointer.leftButtonDown()) {
       let leftOrRight = this.checkDirection();
       this.anims.play(`${leftOrRight}_mine`, true);
     }
 
     if (this.scene.input.activePointer.leftButtonReleased()) {
       this.miningCount = 0;
-    }
+    } */
 
     // idle animation
     if (this.body.velocity.x == 0 && this.body.velocity.y == 0 && !this.scene.input.activePointer.leftButtonDown()) {
