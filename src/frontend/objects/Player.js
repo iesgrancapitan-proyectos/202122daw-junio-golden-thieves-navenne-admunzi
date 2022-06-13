@@ -22,6 +22,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     // scene.physics.add.collider(this, scene.wallsLayer);
     scene.physics.add.collider(this, scene.fallLayer);
     scene.physics.add.collider(this, scene.ores);
+    scene.physics.add.collider(this, scene.interactable_objectsLayer);
 
     this.onWorldBounds = true;
     // this.setCollideWorldBounds(true);
@@ -30,12 +31,35 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     // range
     this.range = scene.add.sprite(this.x, this.y, "range");
     scene.physics.world.enable(this.range);
-    scene.physics.add.overlap(this.range, scene.ores, this.checkNear, () => {}, this);
     this.range.setAlpha(0);
     this.range.body.setSize(this.width + 50, this.height + 50, -5, 0);
 
+    //overlap ores
+    scene.physics.add.overlap(this.range, scene.ores, this.checkNearOre, () => {}, this);
+    
+    //  overlap vote
+    scene.physics.add.overlap(this.range, scene.voteObject, this.voteObjectInside, null, scene)    
+    
+    //  overlap anvil
+    scene.physics.add.overlap(this.range, scene.anvilObject, this.anvilObjectInside, null, scene)    
+
+    //  overlap minecartGeneral
+    scene.physics.add.overlap(this.range, scene.minecartGeneralObject, this.minecartGeneralObjectInside, null, scene)    
+
+    //  overlap minecartImpostor
+    scene.physics.add.overlap(this.range, scene.minecartImpostorObject, this.minecartImpostorObjectInside, null, scene)    
+
+    //  overlap buttom jail
+    scene.physics.add.overlap(this.range, scene.buttonJailObject, this.buttonJailObjectInside, null, scene)    
+
     // size
-    this.setScale(2);
+    this.setScale(1.4);
+
+    // player tool 
+    this.tool = true;
+
+    // player gold
+    this.gold = 0;
 
     // mining
     this.on("animationcomplete-left_mine", () => {
@@ -187,9 +211,92 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     return ["left", "left_idle", "up", "down"].includes(this.keydown) ? "left" : "right";
   }
 
-  checkNear(range, ore) {
+  checkNearOre(range, ore) {
     if (this.miningCount > 2) {
       ore.disableBody(true, true);
+      this.miningCount = 0;
+
+      this.gold =+ 20;
     }
   }
+
+  voteObjectInside(){
+    this.voteObjectKeyEText.setVisible(true)
+
+    if (Phaser.Input.Keyboard.JustDown(this.keyE)) {
+      this.socket.emit("vote panels");
+      this.scene.launch('VoteScene',this);
+    }
+  }
+
+  anvilObjectInside(){
+    this.anvilObjectKeyEText.setVisible(true)
+
+    if (Phaser.Input.Keyboard.JustDown(this.keyE)) {
+      console.log("Interactuas");
+    }
+  }
+
+  minecartGeneralObjectInside(){
+    this.minecartGeneralObjectKeyEText.setVisible(true)
+
+    if (Phaser.Input.Keyboard.JustDown(this.keyE)) {
+      console.log("Interactuas");
+    }
+  }
+
+  minecartImpostorObjectInside(){
+    this.minecartImpostorObjectKeyEText.setVisible(true)
+
+    if (Phaser.Input.Keyboard.JustDown(this.keyE)) {
+      console.log("Interactuas");
+    }
+  }
+  
+  minecartImpostorObjectInside(){
+    this.minecartImpostorObjectKeyEText.setVisible(true)
+
+    if (Phaser.Input.Keyboard.JustDown(this.keyE)) {
+      console.log("Interactuas");
+    }
+  }
+
+  buttonJailObjectInside(){
+    this.buttonJailObjectKeyEText.setVisible(true)
+
+    if (Phaser.Input.Keyboard.JustDown(this.keyE)) {
+      console.log("Interactuas");
+    }
+  }
+
+  checkVoteObjectOverlap(scene, player, voteObject) {
+    if (!Phaser.Geom.Intersects.RectangleToRectangle(player.getBounds(), voteObject.getBounds())) {
+      scene.voteObjectKeyEText.setVisible(false)
+    }
+  }
+
+  checkAnvilObjectOverlap(scene, player, anvilObject) {
+    if (!Phaser.Geom.Intersects.RectangleToRectangle(player.getBounds(), anvilObject.getBounds())) {
+      scene.anvilObjectKeyEText.setVisible(false)
+    }
+  }
+
+  checkminecartGeneralObjectOverlap(scene, player, minecartGeneralObject) {
+    if (!Phaser.Geom.Intersects.RectangleToRectangle(player.getBounds(), minecartGeneralObject.getBounds())) {
+      scene.minecartGeneralObjectKeyEText.setVisible(false)
+    }
+  }
+
+  checkminecartImpostorObjectOverlap(scene, player, minecartImpostorObject) {
+    if (!Phaser.Geom.Intersects.RectangleToRectangle(player.getBounds(), minecartImpostorObject.getBounds())) {
+      scene.minecartImpostorObjectKeyEText.setVisible(false)
+    }
+  }
+  
+  checkButtonJailObjectOverlap(scene, player, buttonJailObject) {
+    if (!Phaser.Geom.Intersects.RectangleToRectangle(player.getBounds(), buttonJailObject.getBounds())) {
+      scene.buttonJailObjectKeyEText.setVisible(false)
+    }
+  }
+
 }

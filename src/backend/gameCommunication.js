@@ -16,6 +16,11 @@ export function gameCommunication(socket, currentPlayers) {
     socket.broadcast.emit("player moved", currentPlayers[socket.id]);
   });
 
+  // when a player opens a vote
+  socket.on("vote panels", function () {
+    socket.broadcast.emit("vote panel", currentPlayers);
+  });
+
   // when a player mines, play animation
   socket.on("player mining", function () {
     socket.broadcast.emit("player mined", currentPlayers[socket.id]);
@@ -35,8 +40,8 @@ export function gameCommunication(socket, currentPlayers) {
     return currentPlayers[socket.id] = {
       socketId: socket.id,
       loginTime: new Date().getTime(),
-      x: 600 + Math.random() * 600,
-      y: 600 + Math.random() * 600,
+      x: Math.floor(Math.random()*(3015 - 2985) + 2985),
+      y: Math.floor(Math.random()*(2015 - 1985) + 1985),
       keydown: "idle",
     };
   }
