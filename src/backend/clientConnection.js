@@ -30,19 +30,23 @@ export function clientConnection(io) {
 
       // set initial state
       socket.emit("setState", roomInfo);
+      gameCommunication(socket, roomInfo);
 
       // send the players object to the new player
-      socket.emit("currentPlayers", {
-        players: roomInfo.players,
-        numPlayers: roomInfo.numPlayers,
-      });
+      socket.emit("currentPlayers", { players: roomInfo.players, numPlayers: roomInfo.numPlayers });
 
       // update all other players of the new player
       socket.to(data.roomKey).emit("newPlayer", {
-        players: roomInfo.players,
+        id: socket.id,
         playerInfo: roomInfo.players[socket.id],
+        players: roomInfo.players,
         numPlayers: roomInfo.numPlayers,
       });
+    });
+
+    // start MainScene for everyone
+    socket.on("start game", function(roomKey) {
+      io.to(roomKey).emit("start scene");
     });
 
     // when a player disconnects, remove them from our players object
@@ -95,7 +99,6 @@ export function clientConnection(io) {
       socket.emit("roomCreated", key);
     });
 
-    //gameCommunication(socket, currentPlayers);
   });
 
   /**

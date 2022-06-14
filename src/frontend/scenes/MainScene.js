@@ -25,7 +25,7 @@ export default class MainScene extends Phaser.Scene {
     const scene = this;
 
     //  tilemap
-    /* this.map = this.make.tilemap({ key: 'mine'})
+     this.map = this.make.tilemap({ key: 'mine'})
     const tileset = this.map.addTilesetImage('base-colour', 'tiles')
     const tilesetUnderBridge = this.map.addTilesetImage('base-colour-under-bridge', 'tilesUnderBridge')
 
@@ -57,10 +57,10 @@ export default class MainScene extends Phaser.Scene {
 
     this.fallLayer = this.map.createLayer('fall', tileset).setCollisionByProperty({ collides: true});
     this.wallsLayer = this.map.createLayer('walls', tileset).setCollisionByProperty({ collides: true});
- */
+
 
     //FOV
-/*     const width = this.groundLayer.width
+     const width = this.groundLayer.width
     const height = this.groundLayer.height
 
     // make a RenderTexture that is the size of the screen
@@ -76,7 +76,7 @@ export default class MainScene extends Phaser.Scene {
     this.rtFOV.draw(this.groundLayer)
 
     // set a dark blue tint
-    this.rtFOV.setTint(0x0a2948) */
+    this.rtFOV.setTint(0x0a2948)
 
     //CHECK COLLIDES WALLS
       // const debugGraphicsWALLS = this.add.graphics().setAlpha(0.75);
@@ -116,9 +116,9 @@ export default class MainScene extends Phaser.Scene {
       scene.addOtherPlayers(id, playerData);
     });
 
-    this.socket.on("remove player", (id) => {
+    this.socket.on("disconnected", (roomInfo) => {
       scene.otherPlayers.getChildren().forEach(function (otherPlayer) {
-        if (id === otherPlayer.socketId) {
+        if (roomInfo.socketId === otherPlayer.socketId) {
           otherPlayer.destroy();
         }
       });
@@ -168,7 +168,7 @@ export default class MainScene extends Phaser.Scene {
       this.player.update();
 
       // update vision when player moves
-      if (this.vision){
+      if (this.vision) {
         this.vision.x = this.player.x
         this.vision.y = this.player.y
       }
@@ -184,14 +184,14 @@ export default class MainScene extends Phaser.Scene {
         });
       }
 
-      /* if (this.input.activePointer.leftButtonDown()) {
+     if (this.input.activePointer.leftButtonDown()) {
         this.socket.emit("player mining");
       }
 
       if (this.input.activePointer.leftButtonReleased()) {
         this.socket.emit("player stop mining");
       }
- */
+ 
       // save old position
       this.player.oldPosition = {
         x: this.player.x,
