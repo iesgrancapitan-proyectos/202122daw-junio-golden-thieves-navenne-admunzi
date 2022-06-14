@@ -70,7 +70,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     });
 
     //FOV
-    scene.vision = scene.make.image({
+      scene.vision = scene.make.image({
       x: this.x,
       y: this.y,
       key: 'fov1',
@@ -79,7 +79,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     scene.vision.scale = 10
   
     scene.rtFOV.mask = new Phaser.Display.Masks.BitmapMask(scene, scene.vision)
-    scene.rtFOV.mask.invertAlpha = true
+    scene.rtFOV.mask.invertAlpha = true  
 
     // Animations
 
@@ -192,14 +192,14 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     }
 
     // mining
-    if (this.scene.input.activePointer.leftButtonDown()) {
+     if (this.scene.input.activePointer.leftButtonDown()) {
       let leftOrRight = this.checkDirection();
       this.anims.play(`${leftOrRight}_mine`, true);
     }
 
     if (this.scene.input.activePointer.leftButtonReleased()) {
       this.miningCount = 0;
-    }
+    } 
 
     // idle animation
     if (this.body.velocity.x == 0 && this.body.velocity.y == 0 && !this.scene.input.activePointer.leftButtonDown()) {

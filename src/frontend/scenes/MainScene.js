@@ -1,4 +1,3 @@
-import io from "socket.io-client";
 import Player from "../objects/Player";
 import Ore from "../objects/Ore";
 
@@ -8,7 +7,7 @@ export default class MainScene extends Phaser.Scene {
   }
 
   init(data) {
-    
+    this.socket = data.socket;
   }
   preload() {
     this.load.bitmapFont("pixelFont", "fonts/pixel.png", "fonts/pixel.xml");
@@ -30,7 +29,7 @@ export default class MainScene extends Phaser.Scene {
     const scene = this;
 
     //  tilemap
-    this.map = this.make.tilemap({ key: 'mine'})
+     this.map = this.make.tilemap({ key: 'mine'})
     const tileset = this.map.addTilesetImage('base-colour', 'tiles')
     const tilesetUnderBridge = this.map.addTilesetImage('base-colour-under-bridge', 'tilesUnderBridge')
     const tilesetMiscObjects = this.map.addTilesetImage('misc-objects', 'tilesMiscObjects')
@@ -107,7 +106,7 @@ export default class MainScene extends Phaser.Scene {
     
     this.keyE = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
     //FOV
-    const width = this.groundLayer.width
+     const width = this.groundLayer.width
     const height = this.groundLayer.height
 
     // make a RenderTexture that is the size of the screen
@@ -141,16 +140,13 @@ export default class MainScene extends Phaser.Scene {
       //   faceColor: new Phaser.Display.Color(40, 39, 37, 255) // Color of colliding face edges
       // });
 
-    this.physics.world.setBounds(0, 0, this.wallsLayer.width, this.wallsLayer.height);
+    //this.physics.world.setBounds(0, 0, this.wallsLayer.width, this.wallsLayer.height);
     this.otherPlayers = this.physics.add.group();
     this.cursors = this.input.keyboard.addKeys({ up: "W", left: "A", down: "S", right: "D" , interact: "E"});
     this.playerLabel = this.add.text(-50, -50, "this is you").setOrigin(0.5, 1);
     this.playersConnectedText = this.add.text(20, 20, "");
     this.physics.world.setBounds(0, 0, 1024, 750);
     this.input.mouse.disableContextMenu();
-
-    // socket connection
-    this.socket = io();
 
     this.socket.on("greeting", (currentPlayers) => {
       Object.keys(currentPlayers).forEach(function (id) {
@@ -166,9 +162,9 @@ export default class MainScene extends Phaser.Scene {
       scene.addOtherPlayers(id, playerData);
     });
 
-    this.socket.on("remove player", (id) => {
+    this.socket.on("disconnected", (roomInfo) => {
       scene.otherPlayers.getChildren().forEach(function (otherPlayer) {
-        if (id === otherPlayer.socketId) {
+        if (roomInfo.socketId === otherPlayer.socketId) {
           otherPlayer.destroy();
         }
       });
@@ -255,14 +251,14 @@ export default class MainScene extends Phaser.Scene {
         });
       }
 
-      if (this.input.activePointer.leftButtonDown()) {
+     if (this.input.activePointer.leftButtonDown()) {
         this.socket.emit("player mining");
       }
 
       if (this.input.activePointer.leftButtonReleased()) {
         this.socket.emit("player stop mining");
       }
-
+ 
       // save old position
       this.player.oldPosition = {
         x: this.player.x,

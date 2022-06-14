@@ -1,19 +1,19 @@
-export function gameCommunication(socket, currentPlayers) {
+export function gameCommunication(socket, roomInfo) {
   //when the scene is ready
   socket.on("ready", () => {
-    // create a new player and add it to currentPlayers
-    let newPlayer = createNewPlayer(currentPlayers, socket);
-    socket.emit("greeting", currentPlayers);
-    socket.broadcast.emit("new player", socket.id, newPlayer);
+    socket.emit("greeting", roomInfo.players);
+    socket.to(roomInfo.roomKey).emit("new player", socket.id, roomInfo.players[socket.id]);
   });
 
   // when a player moves, update the player data
   socket.on("player movement", function (data) {
-    currentPlayers[socket.id].x = data.x;
-    currentPlayers[socket.id].y = data.y;
-    currentPlayers[socket.id].keydown = data.keydown;
-    // emit a message to all players about the player that moved
-    socket.broadcast.emit("player moved", currentPlayers[socket.id]);
+    if (roomInfo.players[socket.id] && data) {
+      roomInfo.players[socket.id].x = data.x;
+      roomInfo.players[socket.id].y = data.y;
+      roomInfo.players[socket.id].keydown = data.keydown;
+      // emit a message to all players about the player that moved
+      socket.to(roomInfo.roomKey).emit("player moved", roomInfo.players[socket.id]);
+    }
   });
 
   // when a player opens a vote
@@ -23,26 +23,11 @@ export function gameCommunication(socket, currentPlayers) {
 
   // when a player mines, play animation
   socket.on("player mining", function () {
-    socket.broadcast.emit("player mined", currentPlayers[socket.id]);
+    socket.to(roomInfo.roomKey).emit("player mined", roomInfo.players[socket.id]);
   });
 
   // when a player stops mining, stop animation
   socket.on("player stop mining", function () {
-    socket.broadcast.emit("player mine stopped", currentPlayers[socket.id]);
+    socket.to(roomInfo.roomKey).emit("player mine stopped", roomInfo.players[socket.id]);
   });
-
-  /**
-   * @function createNewPlayer
-   * @description Creates a new player
-   * @param {*} socket - the socket connection
-   */
-  function createNewPlayer(currentPlayers, socket) {
-    return currentPlayers[socket.id] = {
-      socketId: socket.id,
-      loginTime: new Date().getTime(),
-      x: Math.floor(Math.random()*(3015 - 2985) + 2985),
-      y: Math.floor(Math.random()*(2015 - 1985) + 1985),
-      keydown: "idle",
-    };
-  }
 }
