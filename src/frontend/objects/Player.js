@@ -17,6 +17,8 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.x = data.x;
     this.y = data.y;
     this.keydown = data.keydown;
+    this.stunned = false;
+    this.tool = true;
 
     // colliders
     // scene.physics.add.collider(this, scene.wallsLayer);
@@ -150,6 +152,8 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         end: 8,
       }),
     });
+
+
   }
 
   update() {
@@ -192,7 +196,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     }
 
     // mining
-    if (this.scene.input.activePointer.leftButtonDown()) {
+    if (this.scene.input.activePointer.leftButtonDown() && this.stunned == false && this.tool) {
       let leftOrRight = this.checkDirection();
       this.anims.play(`${leftOrRight}_mine`, true);
     }
@@ -204,6 +208,17 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     // idle animation
     if (this.body.velocity.x == 0 && this.body.velocity.y == 0 && !this.scene.input.activePointer.leftButtonDown()) {
       this.anims.play(`${leftOrRight}_idle`, true);
+    }
+  }
+
+  stunnedUpdateTimer(scene){
+    //finish counter
+    --scene.player.stunnedCounter;
+    if (scene.player.stunnedCounter == 0) {
+      console.log("tiempo terminado");
+      scene.player.stunned = false;
+      scene.physics.world.enable(scene.player);
+
     }
   }
 
