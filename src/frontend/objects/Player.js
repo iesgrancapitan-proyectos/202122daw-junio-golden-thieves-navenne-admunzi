@@ -1,8 +1,8 @@
 export default class Player extends Phaser.Physics.Arcade.Sprite {
   constructor(scene, id, data) {
     super(scene, data.x, data.y, "player");
-    scene.add.existing(this);
-
+    scene.playerLayer.add(this);
+ 
     // enable physics
     scene.physics.world.enable(this);
 

@@ -76,7 +76,7 @@ export default class MainScene extends Phaser.Scene {
     this.fallLayer = this.map.createLayer('fall', tileset).setCollisionByProperty({ collides: true});
     this.wallsLayer = this.map.createLayer('walls', tileset).setCollisionByProperty({ collides: true});
     this.interactable_objectsLayer = this.map.createLayer('interactable-objects', tilesetMiscObjects).setCollisionByProperty({ collides: true});
-
+    this.playerLayer = this.add.layer();
     // gui gold
     this.add.image(230,130,"guiGold").setScrollFactor(0).setDepth(1);
     this.goldPlayerGui = this.add.bitmapText(190,81, 'pixelFont', "2134", 25, 1).setDropShadow(4, 4, "#000", 1).setScrollFactor(0).setDepth(2);
@@ -346,7 +346,7 @@ export default class MainScene extends Phaser.Scene {
         });
       }
 
-     if (this.input.activePointer.leftButtonDown()) {
+      if (this.input.activePointer.leftButtonDown()) {
         this.socket.emit("player mining");
       }
 
