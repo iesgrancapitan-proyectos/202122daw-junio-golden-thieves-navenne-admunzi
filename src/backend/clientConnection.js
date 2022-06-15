@@ -99,6 +99,17 @@ export function clientConnection(io) {
       socket.emit("roomCreated", key);
     });
 
+    // when a player use stun ability, the player is stunned
+    socket.on("stun player", function (id) {
+      // emit the stun to the player
+      io.to(id).emit('i am stunned', null , function(data) {});
+    });
+
+    // when a player use break tool ability
+    socket.on("breakTool player", function (id) {
+      // emit break tool to the player
+      io.to(id).emit('broken tool', null , function(data) {});
+    });
   });
 
   /**

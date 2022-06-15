@@ -22,7 +22,37 @@ export default class MainScene extends Phaser.Scene {
     this.load.image("fov1", "assets/fov-1.png")
     this.load.image("abilityBreak", "assets/abilityBreak.png")
     this.load.image("abilityStun", "assets/abilityStun.png")
+    this.load.image("abilityTransform", "assets/abilityTransform.png")
+    this.load.bitmapFont("pixelFont", "fonts/pixel.png", "fonts/pixel.xml");
     this.load.image("guiGold", "assets/guiGold.png")
+
+  }
+
+  abilityBreakUpdateTimer(scene){
+    scene.abilityBreakText.setText(--scene.abilityBreakCounter);
+    if (scene.abilityBreakCounter == 0) {
+      scene.abilityBreakBt.setInteractive();
+      scene.abilityBreakText.setVisible(false);
+      scene.abilityBreakBt.clearTint();
+    }
+  }
+
+  abilityStunUpdateTimer(scene){
+    scene.abilityStunText.setText(--scene.abilityStunCounter);
+    if (scene.abilityStunCounter == 0) {
+      scene.abilityStunBt.setInteractive();
+      scene.abilityStunText.setVisible(false);
+      scene.abilityStunBt.clearTint();
+    }
+  }
+
+  abilityTransformUpdateTimer(scene){
+    scene.abilityTransformText.setText(--scene.abilityTransformCounter);
+    if (scene.abilityTransformCounter == 0) {
+      scene.abilityTransformBt.setInteractive();
+      scene.abilityTransformText.setVisible(false);
+      scene.abilityTransformBt.clearTint();
+    }
   }
 
   create() {
@@ -47,7 +77,7 @@ export default class MainScene extends Phaser.Scene {
     this.wallsLayer = this.map.createLayer('walls', tileset).setCollisionByProperty({ collides: true});
     this.interactable_objectsLayer = this.map.createLayer('interactable-objects', tilesetMiscObjects).setCollisionByProperty({ collides: true});
 
-    // add gui gold
+    // gui gold
     this.add.image(230,130,"guiGold").setScrollFactor(0).setDepth(1);
     this.goldPlayerGui = this.add.bitmapText(190,81, 'pixelFont', "2134", 25, 1).setDropShadow(4, 4, "#000", 1).setScrollFactor(0).setDepth(2);
     this.goldTeamNormalGui = this.add.bitmapText(170,117, 'pixelFont', "2000 / 2000", 25, 1).setDropShadow(4, 4, "#000", 1).setScrollFactor(0).setDepth(2);
@@ -123,6 +153,59 @@ export default class MainScene extends Phaser.Scene {
 
       // set a dark blue tint
       this.rtFOV.setTint(0x0a2948)
+
+    // draw ability buttom and text
+    this.abilityBreakText = this.add.bitmapText(543, 585, 'pixelFont', "", 30, 1).setDropShadow(3, 3, "#000", 1).setScrollFactor(0).setDepth(2);
+    this.abilityBreakBt = this.add.image(560, 600 , 'abilityBreak').setScrollFactor(0).setScale(1.65).setInteractive().setDepth(1);;
+
+    // add event click to abilityBreakBt
+    this.abilityBreakBt.on("pointerup",()=>{
+      scene.abilityBreakCounter = 30;
+      scene.abilityBreakBtTimer = this.time.addEvent({ delay: 1000, repeat: 29, callback: this.abilityBreakUpdateTimer, args: [scene]})
+      scene.abilityBreakBt.setTint(0x363636).removeInteractive();
+      scene.abilityBreakText.setVisible(true);
+
+      // functionality overlap players
+      scene.otherPlayers.children.each(function(player) {
+        if(scene.checkOverlapPlayers(scene.player.range, player, scene)){
+          scene.socket.emit("breakTool player", player.socketId);
+          return false;
+        }
+      }, this);
+    })
+
+    // draw ability buttom and text
+    this.abilityStunText = this.add.bitmapText(623, 585, 'pixelFont', "", 30, 1).setDropShadow(3, 3, "#000", 1).setScrollFactor(0).setDepth(2);
+    this.abilityStunBt = this.add.image(640, 600 , 'abilityStun').setScrollFactor(0).setScale(1.65).setInteractive().setDepth(1);;
+
+    // add event click abilityStunBt
+    this.abilityStunBt.on("pointerup",()=>{
+      scene.abilityStunCounter = 30;
+      scene.abilityStunBtTimer = this.time.addEvent({ delay: 1000, repeat: 29, callback: this.abilityStunUpdateTimer, args: [scene]})
+      scene.abilityStunBt.setTint(0x363636).removeInteractive();
+      scene.abilityStunText.setVisible(true);
+
+      //overlap players
+      scene.otherPlayers.children.each(function(player) {
+        if(scene.checkOverlapPlayers(scene.player.range, player, scene)){
+          scene.socket.emit("stun player", player.socketId);
+          return false;
+        }
+      }, this);
+    })
+
+    // draw ability Transform buttom and text
+    this.abilityTransformText = this.add.bitmapText(703, 585, 'pixelFont', "", 30, 1).setDropShadow(3, 3, "#000", 1).setScrollFactor(0).setDepth(2);
+    this.abilityTransformBt = this.add.image(720, 600 , 'abilityTransform').setScrollFactor(0).setScale(1.65).setInteractive().setDepth(1);
+
+    // add event click ability Transform
+    this.abilityTransformBt.on("pointerup",()=>{
+      scene.abilityTransformCounter = 30;
+      scene.abilityTransformBtTimer = this.time.addEvent({ delay: 1000, repeat: 29, callback: this.abilityTransformUpdateTimer, args: [scene]})
+      scene.abilityTransformBt.setTint(0x363636).removeInteractive();
+      scene.abilityTransformText.setVisible(true);
+
+    })
 
     //CHECK COLLIDES WALLS
       // const debugGraphicsWALLS = this.add.graphics().setAlpha(0.75);
@@ -206,6 +289,18 @@ export default class MainScene extends Phaser.Scene {
       });
     });
 
+    this.socket.on("i am stunned", function () {
+      console.log("aturdido");
+      scene.player.stunned = true;
+      scene.player.stunnedCounter = 9;
+      scene.physics.world.disable(scene.player);
+      scene.player.stunnedTimer = scene.time.addEvent({ delay: 1000, repeat: 9, callback: scene.player.stunnedUpdateTimer, args: [scene]})
+    });
+
+    this.socket.on("broken tool", function () {
+      console.log("herramienta rota");
+      scene.player.tool = false;
+    });
 
     this.socket.emit("ready");
   }
@@ -282,4 +377,13 @@ export default class MainScene extends Phaser.Scene {
     this.otherPlayers.add(this.otherPlayer);
   }
 
+  abilitieStun(){
+    console.log("Tira habilidad");
+  }
+
+  checkOverlapPlayers(range, otherPlayer, scene) {
+    let rectangleArea = new Phaser.Geom.Rectangle(range.x, range.y, range.width+45, range.height+45, 0x6666ff);
+    let rectanglePlayer = new Phaser.Geom.Rectangle(otherPlayer.x, otherPlayer.y, otherPlayer.width+10, otherPlayer.height+20, 0x2222ff);
+    return Phaser.Geom.Intersects.RectangleToRectangle(rectangleArea, rectanglePlayer);
+  }
 }
