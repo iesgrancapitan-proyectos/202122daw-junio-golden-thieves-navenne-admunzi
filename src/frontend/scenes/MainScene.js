@@ -23,6 +23,7 @@ export default class MainScene extends Phaser.Scene {
     this.load.image("abilityBreak", "assets/abilityBreak.png")
     this.load.image("abilityStun", "assets/abilityStun.png")
     this.load.image("abilityTransform", "assets/abilityTransform.png")
+    this.load.image("abilitySteal", "assets/abilitySteal.png")
     this.load.bitmapFont("pixelFont", "fonts/pixel.png", "fonts/pixel.xml");
     this.load.image("guiGold", "assets/guiGold.png")
 
@@ -177,15 +178,19 @@ export default class MainScene extends Phaser.Scene {
     })
 
     // draw ability buttom and text
-    this.abilityStunText = this.add.bitmapText(623, 585, 'pixelFont', "", 30, 1).setDropShadow(3, 3, "#000", 1).setScrollFactor(0).setDepth(2);
+    this.abilityStunText = this.add.bitmapText(623, 585, 'pixelFont', "", 30, 1).setDropShadow(3, 3, "#000", 1).setScrollFactor(0).setDepth(2).setAlpha(0.5);
     this.abilityStunBt = this.add.image(640, 600 , 'abilityStun').setScrollFactor(0).setScale(1.65).setInteractive().setDepth(1).setVisible(false);
+    this.abilityStealBt = this.add.image(640, 600 , 'abilitySteal').setScrollFactor(0).setScale(1.65).setInteractive().setDepth(1).setVisible(false);
 
     // add event click abilityStunBt
     this.abilityStunBt.on("pointerup",()=>{
       this.abilityStunCounter = 30;
       this.abilityStunBtTimer = this.time.addEvent({ delay: 1000, repeat: 29, callback: this.abilityStunUpdateTimer, args: [this]})
-      this.abilityStunBt.setTint(0x363636).removeInteractive();
+      this.abilityStunBt.setTint(0x363636).setVisible(false);
       this.abilityStunText.setVisible(true);
+
+      this.abilityStealBt.setVisible(true);
+
 
       //overlap players
       this.otherPlayers.children.each(function(player) {
@@ -195,6 +200,23 @@ export default class MainScene extends Phaser.Scene {
         }
       }, this);
     })
+
+    this.abilityStealBt.on("pointerup",()=>{
+
+      console.log(this.socket.id);
+
+      // //overlap players
+      this.otherPlayers.children.each(function(player) {
+        if(this.checkOverlapPlayers(this.player.range, player, this)){
+          this.socket.emit("steal player", {objective: player.socketId, origin: this.socket.id});
+          return false;
+        }
+      }, this);
+      this.abilityStunText.setAlpha(0.5)
+      this.abilityStealBt.setVisible(false);
+      this.abilityStunBt.setVisible(true);
+    })
+
 
     // draw ability Transform buttom and text
     this.abilityTransformText = this.add.bitmapText(703, 585, 'pixelFont', "", 30, 1).setDropShadow(3, 3, "#000", 1).setScrollFactor(0).setDepth(2);
@@ -302,6 +324,18 @@ export default class MainScene extends Phaser.Scene {
       if (!scene.player.thief) {
         scene.player.tool = false;
       }
+    });
+
+    this.socket.on("stolen player", function (data) {
+      scene.socket.emit('send money stolen', data['gold'] = parseInt(scene.goldPlayerGui._text, 10));
+      scene.goldPlayerGui.setText("0");
+    });
+    
+    this.socket.on("save stolen money", function (data) {
+      console.log("llega");
+      console.log(data.gold);
+      let total = parseInt(scene.goldPlayerGui._text, 10) + data.gold;
+      scene.goldPlayerGui.setText(total)
     });
 
     // when the goldTeamNormalGui is uptaded

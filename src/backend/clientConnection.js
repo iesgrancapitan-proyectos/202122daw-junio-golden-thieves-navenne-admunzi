@@ -133,6 +133,18 @@ export function clientConnection(io) {
       // emit break tool to the player
       io.to(id).emit('broken tool', null , function(data) {});
     });
+
+    // when a player use steal ability
+    socket.on("steal player", function (data) {
+      io.to(data.objective).emit('stolen player', data);
+    });
+
+    // return the stolen money
+    socket.on("send money stolen", function (data) {
+      console.log("send money stolen");
+      console.log(data.gold);
+      io.to(data.origin).emit('save stolen money', data);
+    });
   });
 
   /**
