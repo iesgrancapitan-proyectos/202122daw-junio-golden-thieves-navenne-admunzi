@@ -8,6 +8,8 @@ export default class MainScene extends Phaser.Scene {
 
   init(data) {
     this.socket = data.socket;
+    this.map = data.map;
+    this.ores = data.ores;
   }
   preload() {
     this.load.atlas("player", "assets/player.png", "assets/player.json");
@@ -23,45 +25,46 @@ export default class MainScene extends Phaser.Scene {
 
   create() {
     const scene = this;
+    console.log(this.map);
 
     //  tilemap
-     this.map = this.make.tilemap({ key: 'mine'})
-    const tileset = this.map.addTilesetImage('base-colour', 'tiles')
-    const tilesetUnderBridge = this.map.addTilesetImage('base-colour-under-bridge', 'tilesUnderBridge')
+    //  this.map = this.make.tilemap({ key: 'mine'})
+    // const tileset = this.map.addTilesetImage('base-colour', 'tiles')
+    // const tilesetUnderBridge = this.map.addTilesetImage('base-colour-under-bridge', 'tilesUnderBridge')
 
-    this.groundLayer = this.map.createLayer('ground', tileset)
-    this.map.createLayer('outline-ground', tileset)
-    this.map.createLayer('under-bridge', tilesetUnderBridge)
-    this.map.createLayer('bridge', tileset)
+    // this.groundLayer = this.map.createLayer('ground', tileset)
+    // this.map.createLayer('outline-ground', tileset)
+    // this.map.createLayer('under-bridge', tilesetUnderBridge)
+    // this.map.createLayer('bridge', tileset)
 
-    this.ores = this.physics.add.group({
-      classType: Ore,
-    });
+    // this.ores = this.physics.add.group({
+    //   classType: Ore,
+    // });
 
-    const ORES_AMOUNT = 600;
-    let oresList = Array.from({length: ORES_AMOUNT});
+    // const ORES_AMOUNT = 600;
+    // let oresList = Array.from({length: ORES_AMOUNT});
 
-    oresList.forEach(value => {
-      let x = -1;
-      let y = -1;
+    // oresList.forEach(value => {
+    //   let x = -1;
+    //   let y = -1;
 
-      while (!this.groundLayer.getTileAtWorldXY(x, y)) {
-        x = Phaser.Math.Between(0, 6000);
-        y = Phaser.Math.Between(0, 4000);
-      }
+    //   while (!this.groundLayer.getTileAtWorldXY(x, y)) {
+    //     x = Phaser.Math.Between(0, 6000);
+    //     y = Phaser.Math.Between(0, 4000);
+    //   }
 
-      let ore = this.ores.create(x, y, "ore");
-      ore.body.setImmovable();
-      ore.body.setAllowGravity(false);
-    });
+    //   let ore = this.ores.create(x, y, "ore");
+    //   ore.body.setImmovable();
+    //   ore.body.setAllowGravity(false);
+    // });
 
-    this.fallLayer = this.map.createLayer('fall', tileset).setCollisionByProperty({ collides: true});
-    this.wallsLayer = this.map.createLayer('walls', tileset).setCollisionByProperty({ collides: true});
+    // this.fallLayer = this.map.createLayer('fall', tileset).setCollisionByProperty({ collides: true});
+    // this.wallsLayer = this.map.createLayer('walls', tileset).setCollisionByProperty({ collides: true});
 
 
     //FOV
-     const width = this.groundLayer.width
-    const height = this.groundLayer.height
+     const width = this.map.groundLayer.width
+    const height = this.map.groundLayer.height
 
     // make a RenderTexture that is the size of the screen
     this.rtFOV = this.make.renderTexture({
@@ -73,7 +76,7 @@ export default class MainScene extends Phaser.Scene {
     this.rtFOV.fill(0x000000, 1)
 
     // draw the floorLayer into it
-    this.rtFOV.draw(this.groundLayer)
+    this.rtFOV.draw(this.map.groundLayer)
 
     // set a dark blue tint
     this.rtFOV.setTint(0x0a2948)
@@ -97,7 +100,6 @@ export default class MainScene extends Phaser.Scene {
     //this.physics.world.setBounds(0, 0, this.wallsLayer.width, this.wallsLayer.height);
     this.otherPlayers = this.physics.add.group();
     this.cursors = this.input.keyboard.addKeys({ up: "W", left: "A", down: "S", right: "D" });
-    this.playerLabel = this.add.text(-50, -50, "this is you").setOrigin(0.5, 1);
     this.playersConnectedText = this.add.text(20, 20, "");
     this.physics.world.setBounds(0, 0, 1024, 750);
     this.input.mouse.disableContextMenu();
@@ -129,6 +131,8 @@ export default class MainScene extends Phaser.Scene {
         if (playerData.socketId === otherPlayer.socketId) {
           otherPlayer.anims.play(playerData.keydown, true);
           otherPlayer.setPosition(playerData.x, playerData.y);
+          otherPlayer.label.x = playerData.x;
+          otherPlayer.label.y = playerData.y - 38;
         }
       });
     });
@@ -162,8 +166,6 @@ export default class MainScene extends Phaser.Scene {
     const scene = this;
 
     if (this.player) {
-      this.playerLabel.x = this.player.x;
-      this.playerLabel.y = this.player.y - 40;
 
       this.player.update();
 
@@ -211,8 +213,9 @@ export default class MainScene extends Phaser.Scene {
   // add any additional players
   addOtherPlayers(id, playerData) {
     this.otherPlayer = new Player(this, id, playerData);
+    this.otherPlayer.label.x = playerData.x;
+    this.otherPlayer.label.y = playerData.y - 38;
     this.otherPlayer.anims.play("right_idle", true);
-    this.otherPlayer.setTint(0x7cc78f);
     this.otherPlayers.add(this.otherPlayer);
   }
 

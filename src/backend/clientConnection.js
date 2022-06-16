@@ -1,4 +1,5 @@
 import { gameCommunication } from "./gameCommunication";
+import { getColor } from "../frontend/functions";
 
 export function clientConnection(io) {
   let gameRooms = {};
@@ -10,7 +11,8 @@ export function clientConnection(io) {
       const roomInfo = gameRooms[data.roomKey];
 
       // create player
-      createNewPlayer(roomInfo.players, socket, data.playerName);
+      let playerNum = Object.keys(roomInfo.players).length + 1;
+      createNewPlayer(playerNum, roomInfo.players, socket, data.playerName);
 
       // update number of players
       roomInfo.numPlayers = Object.keys(roomInfo.players).length;
@@ -42,11 +44,16 @@ export function clientConnection(io) {
         players: roomInfo.players,
         numPlayers: roomInfo.numPlayers,
       });
+
+      // socket.on("create map", function(map) {
+      //   io.to(roomKey).emit("get map", map);
+      // })
     });
 
     // start MainScene for everyone
-    socket.on("start game", function(roomKey) {
-      io.to(roomKey).emit("start scene");
+    socket.on("start game", function(data) {
+      console.log(data);
+      io.to(data.roomKey).emit("start scene", data.oresList);
     });
 
     // when a player disconnects, remove them from our players object
@@ -67,6 +74,18 @@ export function clientConnection(io) {
 
       if (roomInfo) {
         console.log("user disconnected: ", socket.id);
+        // send a message with count of players
+        const time = new Date();
+        console.log(
+          roomInfo.numPlayers +
+            " logged in @ " +
+            time.toLocaleString("es-ES", {
+              timeZone: "Europe/Madrid",
+              hourCycle: "h23",
+              hour: "numeric",
+              minute: "numeric",
+            })
+        );
         // remove this player from our players object
         delete roomInfo.players[socket.id];
         // update numPlayers
@@ -106,7 +125,7 @@ export function clientConnection(io) {
    * @description Creates a new player
    * @param {*} socket - the socket connection
    */
-  function createNewPlayer(currentPlayers, socket, playerName) {
+  function createNewPlayer(playerNum, currentPlayers, socket, playerName) {
     return (currentPlayers[socket.id] = {
       socketId: socket.id,
       loginTime: new Date().getTime(),
@@ -114,6 +133,7 @@ export function clientConnection(io) {
       y: Math.floor(Math.random() * (2015 - 1985) + 1985),
       keydown: "idle",
       name: playerName,
+      color: getColor(playerNum),
     });
   }
 

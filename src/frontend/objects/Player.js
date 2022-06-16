@@ -17,6 +17,8 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.x = data.x;
     this.y = data.y;
     this.keydown = data.keydown;
+    this.name = data.name;
+    this.color = data.color;
 
     // colliders
     //scene.physics.add.collider(this, scene.wallsLayer);
@@ -36,6 +38,12 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
 
     // size
     this.setScale(2);
+
+    // name
+    this.label = this.scene.add.text(-50, -50, this.name).setOrigin(0.5, 1);
+
+    // color
+    this.setTint(this.color);
 
     // mining
     this.on("animationcomplete-left_mine", () => {
@@ -129,6 +137,8 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
   }
 
   update() {
+    this.label.x = this.x;
+    this.label.y = this.y - 38;
     this.range.x = this.x;
     this.range.y = this.y;
 
