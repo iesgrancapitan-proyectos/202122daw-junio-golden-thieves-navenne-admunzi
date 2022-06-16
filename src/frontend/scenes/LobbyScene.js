@@ -38,9 +38,11 @@ export default class LobbyScene extends Phaser.Scene {
       });
       scene.roomKey = roomInfo.roomKey;
       scene.players = roomInfo.players;
+      scene.numPlayers = roomInfo.numPlayers;
     });
 
     this.socket.on("currentPlayers", function (data) {
+
       if (data.numPlayers == 1) {
 
         // create map
@@ -59,12 +61,10 @@ export default class LobbyScene extends Phaser.Scene {
 
 
         scene.startButton.on("pointerdown", function(){
+          scene.socket.emit("choose thieves");
           scene.socket.emit("start game", { roomKey: scene.roomKey, oresList: scene.map.ores });
         });
       }
-        // scene.socket.on("get map", function (map) {
-        //   scene.map = map;
-        // })
         scene.updateList(data);
     });
 

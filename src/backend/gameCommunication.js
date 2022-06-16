@@ -16,6 +16,26 @@ export function gameCommunication(socket, roomInfo) {
     }
   });
 
+  // when a player moves, update the range
+  socket.on("player movement, range", function (data) {
+    socket.to(roomInfo.roomKey).emit("player moved, range", roomInfo.players[socket.id]);
+  });
+
+  // when a player opens a vote
+  socket.on("vote panels", function () {
+    socket.broadcast.emit("vote panel");
+  });
+
+  // when a player update the gold team normal
+  socket.on("update goldTeamNormalGui", function (gold) {
+    socket.to(roomInfo.roomKey).emit("All update goldTeamNormalGui", gold);
+  });
+
+  // when a player update the gold team impostor
+  socket.on("update goldTeamImpostorGui", function (gold) {
+    socket.to(roomInfo.roomKey).emit("All update goldTeamImpostorGui", gold);
+  });
+  
   // when a player mines, play animation
   socket.on("player mining", function () {
     socket.to(roomInfo.roomKey).emit("player mined", roomInfo.players[socket.id]);

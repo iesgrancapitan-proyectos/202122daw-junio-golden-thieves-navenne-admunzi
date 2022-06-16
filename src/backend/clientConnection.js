@@ -14,6 +14,28 @@ export function clientConnection(io) {
       let playerNum = Object.keys(roomInfo.players).length + 1;
       createNewPlayer(playerNum, roomInfo.players, socket, data.playerName);
 
+      socket.on("choose thieves", function() {
+        let amountPlayers = roomInfo.numPlayers;
+        let amountThiefs = 0;
+        if (12 >= amountPlayers && amountPlayers >= 10) {
+          amountThiefs = 3;
+        } else if (9 >= amountPlayers && amountPlayers >= 5) {
+          amountThiefs = 2;
+        } else {
+          amountThiefs = 1;
+        }
+
+        let aListSocketIds = Object.keys(roomInfo.players);
+
+        while (amountThiefs != 0) {
+          let socketAleatory = aListSocketIds[Math.floor(Math.random() * amountPlayers)];
+          if (roomInfo.players[socketAleatory].thief == false) {
+            roomInfo.players[socketAleatory].thief = true;
+            --amountThiefs;
+          }
+        }
+      });
+
       // update number of players
       roomInfo.numPlayers = Object.keys(roomInfo.players).length;
 
@@ -44,10 +66,6 @@ export function clientConnection(io) {
         players: roomInfo.players,
         numPlayers: roomInfo.numPlayers,
       });
-
-      // socket.on("create map", function(map) {
-      //   io.to(roomKey).emit("get map", map);
-      // })
     });
 
     // start MainScene for everyone
@@ -117,6 +135,23 @@ export function clientConnection(io) {
       socket.emit("roomCreated", key);
     });
 
+    // when a player use stun ability, the player is stunned
+    socket.on("stun player", function (id) {
+      // emit the stun to the player
+      io.to(id).emit('i am stunned', null , function(data) {});
+    });
+
+    // move player from jail to center map
+    socket.on("leave jail", function (id) {
+      // remove player from jail
+      io.to(id).emit('i am out jail');
+    });
+
+    // when a player use break tool ability
+    socket.on("breakTool player", function (id) {
+      // emit break tool to the player
+      io.to(id).emit('broken tool', null , function(data) {});
+    });
   });
 
   /**
@@ -133,6 +168,7 @@ export function clientConnection(io) {
       keydown: "idle",
       name: playerName,
       color: getColor(playerNum),
+      thief: false,
     });
   }
 
