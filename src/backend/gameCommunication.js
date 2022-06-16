@@ -16,6 +16,11 @@ export function gameCommunication(socket, roomInfo) {
     }
   });
 
+  // when a player moves, update the range
+  socket.on("player movement, range", function (data) {
+    socket.to(roomInfo.roomKey).emit("player moved, range", roomInfo.players[socket.id]);
+  });
+
   // when a player opens a vote
   socket.on("vote panels", function () {
     socket.broadcast.emit("vote panel");

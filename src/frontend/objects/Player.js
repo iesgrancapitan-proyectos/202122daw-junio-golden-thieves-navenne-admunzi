@@ -53,7 +53,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     scene.physics.add.overlap(this.range, scene.minecartImpostorObject, this.minecartImpostorObjectInside, null, this)    
 
     //  overlap buttom jail
-    scene.physics.add.overlap(this.range, scene.buttonJailObject, this.buttonJailObjectInside, null, scene)    
+    scene.physics.add.overlap(this.range, scene.buttonJailObject, this.buttonJailObjectInside, null, this)    
 
     // size
     this.setScale(1.4);
@@ -81,6 +81,15 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     scene.goldTeamNormalGui.setText("0");
     scene.goldTeamImpostorGui.setText("0");
     
+    scene.socket.on("player moved, range", function (playerData) {
+      scene.otherPlayers.getChildren().forEach(function (otherPlayer) {
+        if (playerData.socketId === otherPlayer.socketId) {
+          otherPlayer.range.x = otherPlayer.x;
+          otherPlayer.range.y = otherPlayer.y;
+        }
+      });
+    });
+
     // Animations
 
     // Right
@@ -151,12 +160,13 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         end: 8,
       }),
     });
-    
   }
 
   update() {
     this.range.x = this.x;
     this.range.y = this.y;
+
+    this.scene.socket.emit("player movement, range");
 
     // if the player is thief
     if (this.thief) {
@@ -294,10 +304,22 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
   }
   
   buttonJailObjectInside(){
-    this.buttonJailObjectKeyEText.setVisible(true)
+    if (this.thief) {
+      this.scene.buttonJailObjectKeyEText.setVisible(true)
 
-    if (Phaser.Input.Keyboard.JustDown(this.keyE)) {
-      console.log("Interactuas");
+      if (Phaser.Input.Keyboard.JustDown(this.scene.keyE)) {
+        console.log("Interactuas");
+
+        // functionality overlap players with jail
+        this.scene.otherPlayers.children.each(function(player) {
+          if(this.scene.checkOverlapJail(player.range, this.scene.areaJail)){
+            this.scene.socket.emit("leave jail", player.socketId);
+            player.x = 3050;
+            player.y = 2080;
+          }
+        }, this);
+      }
+  
     }
   }
 

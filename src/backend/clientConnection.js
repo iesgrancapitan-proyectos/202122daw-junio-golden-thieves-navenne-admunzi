@@ -128,6 +128,12 @@ export function clientConnection(io) {
       io.to(id).emit('i am stunned', null , function(data) {});
     });
 
+    // move player from jail to center map
+    socket.on("leave jail", function (id) {
+      // remove player from jail
+      io.to(id).emit('i am out jail', null , function(data) {});
+    });
+
     // when a player use break tool ability
     socket.on("breakTool player", function (id) {
       // emit break tool to the player
@@ -149,7 +155,6 @@ export function clientConnection(io) {
       keydown: "idle",
       name: playerName,
       thief: false,
-
     });
   }
 

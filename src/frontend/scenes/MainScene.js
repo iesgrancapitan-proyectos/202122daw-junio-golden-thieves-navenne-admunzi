@@ -133,7 +133,8 @@ export default class MainScene extends Phaser.Scene {
     this.physics.world.enable(this.buttonJailObject);
     this.buttonJailObject.setAlpha(0);
     this.buttonJailObjectKeyEText = this.add.bitmapText(2940, 2145, 'pixelFont', "E", 35, 1).setDropShadow(4, 4, "#000", 1).setVisible(false);
-    
+    this.areaJail = new Phaser.Geom.Rectangle(3165, 2050, 50, 50);
+
     this.keyE = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
     //FOV
      const width = this.groundLayer.width
@@ -145,8 +146,6 @@ export default class MainScene extends Phaser.Scene {
       height
     }, true)
 
-    console.log("entra");
-    
     // fill it with black
     this.rtFOV.fill(0x000000, 1)
 
@@ -304,6 +303,11 @@ export default class MainScene extends Phaser.Scene {
       }
     });
 
+    this.socket.on("i am out jail", function () {
+      this.player.x = 3050;
+      this.player.y = 2080;
+    });
+    
     // when the goldTeamNormalGui is uptaded
     this.socket.on("All update goldTeamNormalGui", function (gold) {
       scene.goldTeamNormalGui.setText(gold);
@@ -389,13 +393,14 @@ export default class MainScene extends Phaser.Scene {
     this.otherPlayers.add(this.otherPlayer);
   }
 
-  abilitieStun(){
-    console.log("Tira habilidad");
-  }
-
   checkOverlapPlayers(range, otherPlayer, scene) {
     let rectangleArea = new Phaser.Geom.Rectangle(range.x, range.y, range.width+45, range.height+45, 0x6666ff);
     let rectanglePlayer = new Phaser.Geom.Rectangle(otherPlayer.x, otherPlayer.y, otherPlayer.width+10, otherPlayer.height+20, 0x2222ff);
     return Phaser.Geom.Intersects.RectangleToRectangle(rectangleArea, rectanglePlayer);
+  }
+
+  checkOverlapJail(range, areaJail, scene) {
+    let rectangleArea = new Phaser.Geom.Rectangle(range.x, range.y, range.width+45, range.height+45, 0x6666ff);
+    return Phaser.Geom.Intersects.RectangleToRectangle(rectangleArea, areaJail);
   }
 }
