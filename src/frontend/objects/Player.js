@@ -17,6 +17,8 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.x = data.x;
     this.y = data.y;
     this.keydown = data.keydown;
+    this.name = data.name;
+    this.color = data.color;
     this.stunned = false;
     this.tool = true;
     this.thief = data.thief;
@@ -57,6 +59,12 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
 
     // size
     this.setScale(1.4);
+
+    // name
+    this.label = this.scene.add.text(-50, -50, this.name).setOrigin(0.5, 1);
+
+    // color
+    this.setTint(this.color);
 
     // mining
     this.on("animationcomplete-left_mine", () => {
@@ -163,6 +171,8 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
   }
 
   update() {
+    this.label.x = this.x;
+    this.label.y = this.y - 38;
     this.range.x = this.x;
     this.range.y = this.y;
 
@@ -244,6 +254,8 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
   checkNearOre(range, ore, ) {
     if (this.miningCount > 2) {
       ore.disableBody(true, true);
+      this.scene.socket.emit("disable ore", ore);
+      
       this.miningCount = 0;
       
       this.scene.goldPlayerGui.setText(parseInt(this.scene.goldPlayerGui._text, 10) + Phaser.Math.Between(5, 40));

@@ -8,6 +8,8 @@ export default class MainScene extends Phaser.Scene {
 
   init(data) {
     this.socket = data.socket;
+    this.map = data.map;
+    this.ores = data.ores;
   }
   preload() {
     this.load.bitmapFont("pixelFont", "fonts/pixel.png", "fonts/pixel.xml");
@@ -83,27 +85,6 @@ export default class MainScene extends Phaser.Scene {
     this.goldTeamNormalGui = this.add.bitmapText(170,117, 'pixelFont', "", 25, 1).setDropShadow(4, 4, "#000", 1).setScrollFactor(0).setDepth(2);
     this.goldTeamImpostorGui = this.add.bitmapText(170,154, 'pixelFont', "", 25, 1).setDropShadow(4, 4, "#000", 1).setScrollFactor(0).setDepth(2);
 
-    // console.log(this.oreLayer) // give an array of sprites
-    const ORES_AMOUNT = 600;
-    let oresList = Array.from({length: ORES_AMOUNT});
-    
-    // area dont spawn ores
-    let areaMainSpawn = new Phaser.Geom.Rectangle(2820, 1920, 450, 300);
-
-    oresList.forEach(value => {
-      let x = -1;
-      let y = -1;
-
-      while (!this.groundLayer.getTileAtWorldXY(x, y) || areaMainSpawn.contains(x, y)) {
-        x = Phaser.Math.Between(0, 6000);
-        y = Phaser.Math.Between(0, 4000);
-      }
-
-      let ore = this.ores.create(x, y, "ore");
-      ore.body.setImmovable();
-      ore.body.setAllowGravity(false);
-    });
-
     // create vote object
     this.voteObject = this.add.sprite(3016, 2000, "voteObject");
     this.physics.world.enable(this.voteObject);
@@ -136,9 +117,10 @@ export default class MainScene extends Phaser.Scene {
     this.areaJail = new Phaser.Geom.Rectangle(3165, 2050, 50, 50);
 
     this.keyE = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
+
     //FOV
-     const width = this.groundLayer.width
-    const height = this.groundLayer.height
+     const width = this.map.groundLayer.width
+    const height = this.map.groundLayer.height
 
     // make a RenderTexture that is the size of the screen
     this.rtFOV = this.make.renderTexture({
@@ -150,7 +132,7 @@ export default class MainScene extends Phaser.Scene {
     this.rtFOV.fill(0x000000, 1)
 
     // draw the floorLayer into it
-    this.rtFOV.draw(this.groundLayer)
+    this.rtFOV.draw(this.map.groundLayer)
 
     // set a dark blue tint
     this.rtFOV.setTint(0x0a2948)
@@ -225,8 +207,9 @@ export default class MainScene extends Phaser.Scene {
 
     //this.physics.world.setBounds(0, 0, this.wallsLayer.width, this.wallsLayer.height);
     this.otherPlayers = this.physics.add.group();
+
     this.cursors = this.input.keyboard.addKeys({ up: "W", left: "A", down: "S", right: "D" , interact: "E"});
-    this.playerLabel = this.add.text(-50, -50, "this is you").setOrigin(0.5, 1);
+
     this.playersConnectedText = this.add.text(20, 20, "");
     this.physics.world.setBounds(0, 0, 1024, 750);
     this.input.mouse.disableContextMenu();
@@ -258,6 +241,8 @@ export default class MainScene extends Phaser.Scene {
         if (playerData.socketId === otherPlayer.socketId) {
           otherPlayer.anims.play(playerData.keydown, true);
           otherPlayer.setPosition(playerData.x, playerData.y);
+          otherPlayer.label.x = playerData.x;
+          otherPlayer.label.y = playerData.y - 38;
         }
       });
     });
@@ -281,6 +266,12 @@ export default class MainScene extends Phaser.Scene {
         }
       });
     });
+
+    this.socket.on("delete ore", function (delete_ore) {
+      let ore_to_delete = scene.ores.getChildren().filter((ore) => ore.x == delete_ore.x && ore.y == delete_ore.y)
+      ore_to_delete.forEach((ore)=>{
+        ore.disableBody(true, true);
+      })
 
     this.socket.on("vote panel", function (playerData) {
       scene.otherPlayers.getChildren().forEach(function (otherPlayer) {
@@ -325,8 +316,6 @@ export default class MainScene extends Phaser.Scene {
     const scene = this;
 
     if (this.player) {
-      this.playerLabel.x = this.player.x;
-      this.playerLabel.y = this.player.y - 40;
 
       this.player.update();
 
@@ -388,8 +377,9 @@ export default class MainScene extends Phaser.Scene {
   // add any additional players
   addOtherPlayers(id, playerData) {
     this.otherPlayer = new Player(this, id, playerData);
+    this.otherPlayer.label.x = playerData.x;
+    this.otherPlayer.label.y = playerData.y - 38;
     this.otherPlayer.anims.play("right_idle", true);
-    this.otherPlayer.setTint(0x7cc78f);
     this.otherPlayers.add(this.otherPlayer);
   }
 

@@ -1,4 +1,4 @@
-import createText from "../functions";
+import { createText } from "../functions";
 export default class RoomScene extends Phaser.Scene {
   constructor() {
     super("RoomScene");
@@ -33,13 +33,13 @@ export default class RoomScene extends Phaser.Scene {
     this.popUp.fillRect(WIDTH / 2 - 200, 50, 400, HEIGHT - 100);
 
     // title
-    this.title = createText(this, 0.15, "Rooms", 50, true, 5);
+    this.title = createText(this, 0.5, 0.15, "Rooms", 50, true, 5);
 
     // get room key button
-    this.getKeyButton = createText(this, 0.4, "Get room key", 40, true, 3);
+    this.getKeyButton = createText(this, 0.5, 0.4, "Get room key", 40, true, 3);
 
     // enter code button
-    createText(this, 0.55, "Enter room key", 20, true, 3);
+    createText(this, 0.5, 0.55, "Enter room key", 20, true, 3);
     this.roomForm = this.add.dom(WIDTH / 2, HEIGHT * 0.62).createFromCache("roomform");
     this.roomForm.addListener("click");
     this.roomForm.on("click", function (event) {
@@ -64,8 +64,8 @@ export default class RoomScene extends Phaser.Scene {
       scene.socket.emit("getRoomCode");
     });
 
-    scene.notValidText = createText(scene, 0.7, '', 25, true, 3);
-    scene.roomKeyText = createText(scene, 0.45, '', 30, true, 3);
+    scene.notValidText = createText(scene, 0.5, 0.7, '', 25, true, 3);
+    scene.roomKeyText = createText(scene, 0.5, 0.45, '', 30, true, 3);
 
     this.socket.on("roomCreated", function (roomKey) {
       scene.roomKey = roomKey;
