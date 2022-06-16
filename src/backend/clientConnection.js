@@ -12,6 +12,29 @@ export function clientConnection(io) {
       // create player
       createNewPlayer(roomInfo.players, socket, data.playerName);
 
+      socket.on("choose thieves", function() {
+        let amountPlayers = roomInfo.numPlayers;
+        let amountThiefs = 0;
+        if (12 >= amountPlayers && amountPlayers >= 10) {
+          amountThiefs = 3;
+        } else if (9 >= amountPlayers && amountPlayers >= 5) {
+          amountThiefs = 2;
+        } else {
+          amountThiefs = 1;
+        }
+
+        let aListSocketIds = Object.keys(roomInfo.players);
+
+        while (amountThiefs != 0) {
+          let socketAleatory = aListSocketIds[Math.floor(Math.random() * amountPlayers)];
+          if (roomInfo.players[socketAleatory].thief == false) {
+            roomInfo.players[socketAleatory].thief = true;
+            --amountThiefs;
+          }
+        }
+        console.log(roomInfo.players);
+      });
+
       // update number of players
       roomInfo.numPlayers = Object.keys(roomInfo.players).length;
 
@@ -42,11 +65,12 @@ export function clientConnection(io) {
         players: roomInfo.players,
         numPlayers: roomInfo.numPlayers,
       });
+
     });
 
     // start MainScene for everyone
-    socket.on("start game", function(roomKey) {
-      io.to(roomKey).emit("start scene");
+    socket.on("start game", function(roomkey) {
+      io.to(roomkey).emit("start scene");
     });
 
     // when a player disconnects, remove them from our players object
@@ -125,6 +149,8 @@ export function clientConnection(io) {
       y: Math.floor(Math.random() * (2015 - 1985) + 1985),
       keydown: "idle",
       name: playerName,
+      thief: false,
+
     });
   }
 

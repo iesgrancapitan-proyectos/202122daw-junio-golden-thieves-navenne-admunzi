@@ -19,6 +19,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.keydown = data.keydown;
     this.stunned = false;
     this.tool = true;
+    this.thief = data.thief;
 
     // colliders
     // scene.physics.add.collider(this, scene.wallsLayer);
@@ -87,6 +88,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
 
     // Right
     this.anims.create({
+
       key: "right",
       frameRate: 8,
       frames: this.anims.generateFrameNames("player", {
@@ -152,13 +154,19 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         end: 8,
       }),
     });
-
-
+    
   }
 
   update() {
     this.range.x = this.x;
     this.range.y = this.y;
+
+    // if the player is thief
+    if (this.thief) {
+      this.scene.abilityBreakBt.setVisible(true);
+      this.scene.abilityStunBt.setVisible(true);
+      this.scene.abilityTransformBt.setVisible(true)
+    }
 
     //Camera Follow
     this.scene.cameras.main.startFollow(this, true, 0.05, 0.05);
