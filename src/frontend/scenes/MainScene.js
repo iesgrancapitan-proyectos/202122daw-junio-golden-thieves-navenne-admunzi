@@ -25,42 +25,6 @@ export default class MainScene extends Phaser.Scene {
 
   create() {
     const scene = this;
-    console.log(this.map);
-
-    //  tilemap
-    //  this.map = this.make.tilemap({ key: 'mine'})
-    // const tileset = this.map.addTilesetImage('base-colour', 'tiles')
-    // const tilesetUnderBridge = this.map.addTilesetImage('base-colour-under-bridge', 'tilesUnderBridge')
-
-    // this.groundLayer = this.map.createLayer('ground', tileset)
-    // this.map.createLayer('outline-ground', tileset)
-    // this.map.createLayer('under-bridge', tilesetUnderBridge)
-    // this.map.createLayer('bridge', tileset)
-
-    // this.ores = this.physics.add.group({
-    //   classType: Ore,
-    // });
-
-    // const ORES_AMOUNT = 600;
-    // let oresList = Array.from({length: ORES_AMOUNT});
-
-    // oresList.forEach(value => {
-    //   let x = -1;
-    //   let y = -1;
-
-    //   while (!this.groundLayer.getTileAtWorldXY(x, y)) {
-    //     x = Phaser.Math.Between(0, 6000);
-    //     y = Phaser.Math.Between(0, 4000);
-    //   }
-
-    //   let ore = this.ores.create(x, y, "ore");
-    //   ore.body.setImmovable();
-    //   ore.body.setAllowGravity(false);
-    // });
-
-    // this.fallLayer = this.map.createLayer('fall', tileset).setCollisionByProperty({ collides: true});
-    // this.wallsLayer = this.map.createLayer('walls', tileset).setCollisionByProperty({ collides: true});
-
 
     //FOV
      const width = this.map.groundLayer.width
@@ -157,6 +121,12 @@ export default class MainScene extends Phaser.Scene {
       });
     });
 
+    this.socket.on("delete ore", function (delete_ore) {
+      let ore_to_delete = scene.ores.getChildren().filter((ore) => ore.x == delete_ore.x && ore.y == delete_ore.y)
+      ore_to_delete.forEach((ore)=>{
+        ore.disableBody(true, true);
+      })
+    });
 
 
     this.socket.emit("ready");

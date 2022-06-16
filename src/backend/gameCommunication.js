@@ -25,4 +25,8 @@ export function gameCommunication(socket, roomInfo) {
   socket.on("player stop mining", function () {
     socket.to(roomInfo.roomKey).emit("player mine stopped", roomInfo.players[socket.id]);
   });
+
+  socket.on("disable ore", function (ore) {
+    socket.to(roomInfo.roomKey).emit("delete ore", ore)
+  })
 }

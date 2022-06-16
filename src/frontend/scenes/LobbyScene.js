@@ -114,7 +114,6 @@ export default class LobbyScene extends Phaser.Scene {
 
     const ORES_AMOUNT = 600;
     if (!oresList) {
-      console.log(this.ores);
       map.oresList = Array.from({length: ORES_AMOUNT});
       map.ores = []; 
 
@@ -136,7 +135,6 @@ export default class LobbyScene extends Phaser.Scene {
       
       );
     } else {
-      console.log(this.ores);
       oresList.forEach((ore)=>{
         let ore2 = this.ores.create(ore.x, ore.y, "ore", `ore_${ore.frame}.png`)
         ore2.body.setImmovable()

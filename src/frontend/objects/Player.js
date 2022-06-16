@@ -200,6 +200,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
   checkNear(range, ore) {
     if (this.miningCount > 2) {
       ore.disableBody(true, true);
+      this.scene.socket.emit("disable ore", ore);
     }
   }
 }

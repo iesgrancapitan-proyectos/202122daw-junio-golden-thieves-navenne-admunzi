@@ -52,7 +52,6 @@ export function clientConnection(io) {
 
     // start MainScene for everyone
     socket.on("start game", function(data) {
-      console.log(data);
       io.to(data.roomKey).emit("start scene", data.oresList);
     });
 
