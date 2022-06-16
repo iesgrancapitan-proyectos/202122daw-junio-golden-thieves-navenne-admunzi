@@ -304,8 +304,8 @@ export default class MainScene extends Phaser.Scene {
     });
 
     this.socket.on("i am out jail", function () {
-      this.player.x = 3050;
-      this.player.y = 2080;
+      scene.player.x = 3050;
+      scene.player.y = 2080;
     });
     
     // when the goldTeamNormalGui is uptaded

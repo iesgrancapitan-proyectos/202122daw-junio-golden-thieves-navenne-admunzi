@@ -131,7 +131,7 @@ export function clientConnection(io) {
     // move player from jail to center map
     socket.on("leave jail", function (id) {
       // remove player from jail
-      io.to(id).emit('i am out jail', null , function(data) {});
+      io.to(id).emit('i am out jail');
     });
 
     // when a player use break tool ability
