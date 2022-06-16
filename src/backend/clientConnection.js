@@ -32,7 +32,6 @@ export function clientConnection(io) {
             --amountThiefs;
           }
         }
-        console.log(roomInfo.players);
       });
 
       // update number of players

@@ -79,9 +79,9 @@ export default class MainScene extends Phaser.Scene {
     this.playerLayer = this.add.layer();
     // gui gold
     this.add.image(230,130,"guiGold").setScrollFactor(0).setDepth(1);
-    this.goldPlayerGui = this.add.bitmapText(190,81, 'pixelFont', "2134", 25, 1).setDropShadow(4, 4, "#000", 1).setScrollFactor(0).setDepth(2);
-    this.goldTeamNormalGui = this.add.bitmapText(170,117, 'pixelFont', "2000 / 2000", 25, 1).setDropShadow(4, 4, "#000", 1).setScrollFactor(0).setDepth(2);
-    this.goldTeamImpostorGui = this.add.bitmapText(170,154, 'pixelFont', "2000 / 2000", 25, 1).setDropShadow(4, 4, "#000", 1).setScrollFactor(0).setDepth(2);
+    this.goldPlayerGui = this.add.bitmapText(190,81, 'pixelFont', "", 25, 1).setDropShadow(4, 4, "#000", 1).setScrollFactor(0).setDepth(2);
+    this.goldTeamNormalGui = this.add.bitmapText(170,117, 'pixelFont', "", 25, 1).setDropShadow(4, 4, "#000", 1).setScrollFactor(0).setDepth(2);
+    this.goldTeamImpostorGui = this.add.bitmapText(170,154, 'pixelFont', "", 25, 1).setDropShadow(4, 4, "#000", 1).setScrollFactor(0).setDepth(2);
 
     // console.log(this.oreLayer) // give an array of sprites
     const ORES_AMOUNT = 600;
@@ -299,8 +299,19 @@ export default class MainScene extends Phaser.Scene {
     });
 
     this.socket.on("broken tool", function () {
-      console.log("herramienta rota");
-      scene.player.tool = false;
+      if (!scene.player.thief) {
+        scene.player.tool = false;
+      }
+    });
+
+    // when the goldTeamNormalGui is uptaded
+    this.socket.on("All update goldTeamNormalGui", function (gold) {
+      scene.goldTeamNormalGui.setText(gold);
+    });
+    
+    // when the goldTeamImpostorGui is uptaded
+    this.socket.on("All update goldTeamImpostorGui", function (gold) {
+      scene.goldTeamImpostorGui.setText(gold);
     });
 
     this.socket.emit("ready");

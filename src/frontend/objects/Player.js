@@ -44,25 +44,19 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     scene.physics.add.overlap(this.range, scene.voteObject, this.voteObjectInside, null, scene)    
     
     //  overlap anvil
-    scene.physics.add.overlap(this.range, scene.anvilObject, this.anvilObjectInside, null, scene)    
+    scene.physics.add.overlap(this.range, scene.anvilObject, this.anvilObjectInside, null, this)    
 
     //  overlap minecartGeneral
-    scene.physics.add.overlap(this.range, scene.minecartGeneralObject, this.minecartGeneralObjectInside, null, scene)    
+    scene.physics.add.overlap(this.range, scene.minecartGeneralObject, this.minecartGeneralObjectInside, null, this)    
 
     //  overlap minecartImpostor
-    scene.physics.add.overlap(this.range, scene.minecartImpostorObject, this.minecartImpostorObjectInside, null, scene)    
+    scene.physics.add.overlap(this.range, scene.minecartImpostorObject, this.minecartImpostorObjectInside, null, this)    
 
     //  overlap buttom jail
     scene.physics.add.overlap(this.range, scene.buttonJailObject, this.buttonJailObjectInside, null, scene)    
 
     // size
     this.setScale(1.4);
-
-    // player tool 
-    this.tool = true;
-
-    // player gold
-    this.gold = 0;
 
     // mining
     this.on("animationcomplete-left_mine", () => {
@@ -80,10 +74,13 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
       add: false
     })
     scene.vision.scale = 10
-  
     scene.rtFOV.mask = new Phaser.Display.Masks.BitmapMask(scene, scene.vision)
     scene.rtFOV.mask.invertAlpha = true  
 
+    scene.goldPlayerGui.setText("0");
+    scene.goldTeamNormalGui.setText("0");
+    scene.goldTeamImpostorGui.setText("0");
+    
     // Animations
 
     // Right
@@ -234,12 +231,12 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     return ["left", "left_idle", "up", "down"].includes(this.keydown) ? "left" : "right";
   }
 
-  checkNearOre(range, ore) {
+  checkNearOre(range, ore, ) {
     if (this.miningCount > 2) {
       ore.disableBody(true, true);
       this.miningCount = 0;
-
-      this.gold =+ 20;
+      
+      this.scene.goldPlayerGui.setText(parseInt(this.scene.goldPlayerGui._text, 10) + Phaser.Math.Between(5, 40));
     }
   }
 
@@ -253,37 +250,49 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
   }
 
   anvilObjectInside(){
-    this.anvilObjectKeyEText.setVisible(true)
+    this.scene.anvilObjectKeyEText.setVisible(true)
 
-    if (Phaser.Input.Keyboard.JustDown(this.keyE)) {
+    if (Phaser.Input.Keyboard.JustDown(this.scene.keyE)) {
       console.log("Interactuas");
+      if (!this.tool) {
+        let costTool = 20;
+        let total = parseInt(this.scene.goldTeamNormalGui._text, 10) - costTool;
+        if (parseInt(this.scene.goldTeamNormalGui._text, 10) >  costTool) {
+          this.tool = true;
+          this.scene.socket.emit("update goldTeamNormalGui", total);
+          this.scene.goldTeamNormalGui.setText(total);
+        }  
+      }
     }
   }
 
   minecartGeneralObjectInside(){
-    this.minecartGeneralObjectKeyEText.setVisible(true)
+    this.scene.minecartGeneralObjectKeyEText.setVisible(true)
 
-    if (Phaser.Input.Keyboard.JustDown(this.keyE)) {
+    if (Phaser.Input.Keyboard.JustDown(this.scene.keyE)) {
       console.log("Interactuas");
+      let gold = parseInt(this.scene.goldPlayerGui._text, 10) + parseInt(this.scene.goldTeamNormalGui._text, 10)
+      this.scene.socket.emit("update goldTeamNormalGui",gold);
+      this.scene.goldTeamNormalGui.setText(gold);
+      this.scene.goldPlayerGui.setText("0");
     }
   }
 
   minecartImpostorObjectInside(){
-    this.minecartImpostorObjectKeyEText.setVisible(true)
+    if (this.thief) {
+      this.scene.minecartImpostorObjectKeyEText.setVisible(true)
 
-    if (Phaser.Input.Keyboard.JustDown(this.keyE)) {
-      console.log("Interactuas");
+      if (Phaser.Input.Keyboard.JustDown(this.scene.keyE)) {
+        console.log("Interactuas");
+        let gold = parseInt(this.scene.goldPlayerGui._text, 10) + parseInt(this.scene.goldTeamImpostorGui._text, 10)
+        this.scene.socket.emit("update goldTeamImpostorGui",gold);
+        this.scene.goldTeamImpostorGui.setText(gold);
+        this.scene.goldPlayerGui.setText("0");
+  
+      }
     }
   }
   
-  minecartImpostorObjectInside(){
-    this.minecartImpostorObjectKeyEText.setVisible(true)
-
-    if (Phaser.Input.Keyboard.JustDown(this.keyE)) {
-      console.log("Interactuas");
-    }
-  }
-
   buttonJailObjectInside(){
     this.buttonJailObjectKeyEText.setVisible(true)
 
