@@ -225,6 +225,7 @@ export default class MainScene extends Phaser.Scene {
           otherPlayer.setPosition(playerData.x, playerData.y);
           otherPlayer.label.x = playerData.x;
           otherPlayer.label.y = playerData.y - 38;
+
         }
       });
     });
@@ -332,6 +333,7 @@ export default class MainScene extends Phaser.Scene {
           y: scene.player.y,
           keydown: scene.player.keydown,
         });
+        this.player.miningCount = 0;
       }
 
       if (this.input.activePointer.leftButtonDown()) {
