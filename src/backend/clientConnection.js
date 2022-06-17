@@ -152,6 +152,18 @@ export function clientConnection(io) {
       // emit break tool to the player
       io.to(id).emit('broken tool', null , function(data) {});
     });
+
+    // when a player use steal ability
+    socket.on("steal player", function (data) {
+      console.log(data);
+      console.log("steal player");
+      io.to(data.objective).emit('stolen player', data);
+    });
+
+    // return the stolen money
+    socket.on("send money stolen", function (data) {
+      io.to(data.origin).emit('save stolen money', data);
+    });
   });
 
   /**

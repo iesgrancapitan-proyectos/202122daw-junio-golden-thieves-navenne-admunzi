@@ -281,6 +281,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         let total = parseInt(this.scene.goldTeamNormalGui._text, 10) - costTool;
         if (parseInt(this.scene.goldTeamNormalGui._text, 10) >  costTool) {
           this.tool = true;
+          this.scene.brokenToolImage.setVisible(false);
           this.scene.socket.emit("update goldTeamNormalGui", total);
           this.scene.goldTeamNormalGui.setText(total);
         }  

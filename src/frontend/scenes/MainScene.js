@@ -25,6 +25,8 @@ export default class MainScene extends Phaser.Scene {
     this.load.image("abilityBreak", "assets/abilityBreak.png")
     this.load.image("abilityStun", "assets/abilityStun.png")
     this.load.image("abilityTransform", "assets/abilityTransform.png")
+    this.load.image("abilitySteal", "assets/abilitySteal.png")
+    this.load.image("brokenTool", "assets/brokenTool.png")
     this.load.bitmapFont("pixelFont", "fonts/pixel.png", "fonts/pixel.xml");
     this.load.image("guiGold", "assets/guiGold.png")
 
@@ -46,6 +48,9 @@ export default class MainScene extends Phaser.Scene {
       scene.abilityStunText.setVisible(false);
       scene.abilityStunBt.clearTint();
     }
+    if (scene.abilityStunCounter == 23) {
+      scene.abilityStealBt.setVisible(false);
+    }
   }
 
   abilityTransformUpdateTimer(scene){
@@ -60,12 +65,17 @@ export default class MainScene extends Phaser.Scene {
   create() {
     const scene = this;
 
-    this.playerLayer = this.add.layer();
+    // Goals
+    this.goldGoalNormal = 2000;
+    this.goldGoalThieves = 2000;
+
     // gui gold
     this.add.image(230,130,"guiGold").setScrollFactor(0).setDepth(1);
-    this.goldPlayerGui = this.add.bitmapText(190,81, 'pixelFont', "", 25, 1).setDropShadow(4, 4, "#000", 1).setScrollFactor(0).setDepth(2);
+    this.goldPlayerGui = this.add.bitmapText(170,81, 'pixelFont', "", 25, 1).setDropShadow(4, 4, "#000", 1).setScrollFactor(0).setDepth(2);
     this.goldTeamNormalGui = this.add.bitmapText(170,117, 'pixelFont', "", 25, 1).setDropShadow(4, 4, "#000", 1).setScrollFactor(0).setDepth(2);
+    this.goldGoalTeamNormalGui = this.add.bitmapText(240,117, 'pixelFont', "/ " + this.goldGoalNormal, 25, 1).setDropShadow(4, 4, "#000", 1).setScrollFactor(0).setDepth(2);
     this.goldTeamImpostorGui = this.add.bitmapText(170,154, 'pixelFont', "", 25, 1).setDropShadow(4, 4, "#000", 1).setScrollFactor(0).setDepth(2);
+    this.goldGoalThievesGui = this.add.bitmapText(240,154, 'pixelFont', "/ " +this.goldGoalThieves, 25, 1).setDropShadow(4, 4, "#000", 1).setScrollFactor(0).setDepth(2);
 
     // create vote object
     this.voteObject = this.add.sprite(3016, 2000, "voteObject");
@@ -140,15 +150,19 @@ export default class MainScene extends Phaser.Scene {
     })
 
     // draw ability buttom and text
-    this.abilityStunText = this.add.bitmapText(623, 585, 'pixelFont', "", 30, 1).setDropShadow(3, 3, "#000", 1).setScrollFactor(0).setDepth(2);
+    this.abilityStunText = this.add.bitmapText(623, 585, 'pixelFont', "", 30, 1).setDropShadow(3, 3, "#000", 1).setScrollFactor(0).setDepth(2).setAlpha(0.5);
     this.abilityStunBt = this.add.image(640, 600 , 'abilityStun').setScrollFactor(0).setScale(1.65).setInteractive().setDepth(1).setVisible(false);
+    this.abilityStealBt = this.add.image(640, 600 , 'abilitySteal').setScrollFactor(0).setScale(1.65).setInteractive().setDepth(1).setVisible(false);
 
     // add event click abilityStunBt
     this.abilityStunBt.on("pointerup",()=>{
       this.abilityStunCounter = 30;
       this.abilityStunBtTimer = this.time.addEvent({ delay: 1000, repeat: 29, callback: this.abilityStunUpdateTimer, args: [this]})
-      this.abilityStunBt.setTint(0x363636).removeInteractive();
+      this.abilityStunBt.setTint(0x363636).setVisible(false);
       this.abilityStunText.setVisible(true);
+      this.abilityStunBt.removeInteractive();
+      this.abilityStealBt.setVisible(true);
+
 
       //overlap players
       this.otherPlayers.children.each(function(player) {
@@ -158,6 +172,21 @@ export default class MainScene extends Phaser.Scene {
         }
       }, this);
     })
+
+    this.abilityStealBt.on("pointerup",()=>{
+
+      // overlap players
+      this.otherPlayers.children.each(function(player) {
+        if(this.checkOverlapPlayers(this.player.range, player, this)){
+          this.socket.emit("steal player", {objective: player.socketId, origin: this.socket.id});
+          return false;
+        }
+      }, this);
+      this.abilityStunText.setAlpha(1)
+      this.abilityStealBt.setVisible(false);
+      this.abilityStunBt.setVisible(true);
+    })
+
 
     // draw ability Transform buttom and text
     this.abilityTransformText = this.add.bitmapText(703, 585, 'pixelFont', "", 30, 1).setDropShadow(3, 3, "#000", 1).setScrollFactor(0).setDepth(2);
@@ -171,6 +200,9 @@ export default class MainScene extends Phaser.Scene {
       this.abilityTransformText.setVisible(true);
 
     })
+
+    this.brokenToolImage = this.add.image(640, 600, "brokenTool").setScrollFactor(0).setScale(1.65).setDepth(1).setVisible(false);
+
     //CHECK COLLIDES WALLS
       // const debugGraphicsWALLS = this.add.graphics().setAlpha(0.75);
       // this.wallsLayer.renderDebug(debugGraphicsWALLS, {
@@ -274,6 +306,7 @@ export default class MainScene extends Phaser.Scene {
     this.socket.on("broken tool", function () {
       if (!scene.player.thief) {
         scene.player.tool = false;
+        scene.brokenToolImage.setVisible(true);
       }
     });
 
@@ -282,6 +315,17 @@ export default class MainScene extends Phaser.Scene {
       scene.player.y = 2080;
     });
     
+    this.socket.on("stolen player", function (data) {
+      data.gold = parseInt(scene.goldPlayerGui._text, 10)
+      scene.goldPlayerGui.setText("0");
+      scene.socket.emit('send money stolen', data);
+    });
+    
+    this.socket.on("save stolen money", function (data) {
+      let total = parseInt(scene.goldPlayerGui._text, 10) + data.gold;
+      scene.goldPlayerGui.setText(total)
+    });
+
     // when the goldTeamNormalGui is uptaded
     this.socket.on("All update goldTeamNormalGui", function (gold) {
       scene.goldTeamNormalGui.setText(gold);
