@@ -74,6 +74,10 @@ export default class MainScene extends Phaser.Scene {
     this.map.createLayer('under-bridge', tilesetUnderBridge)
     this.map.createLayer('bridge', tileset)
 
+    // Goals
+    this.goldGoalNormal = 2000;
+    this.goldGoalThieves = 2000;
+
     this.ores = this.physics.add.group({
       classType: Ore,
     });
@@ -82,11 +86,14 @@ export default class MainScene extends Phaser.Scene {
     this.wallsLayer = this.map.createLayer('walls', tileset).setCollisionByProperty({ collides: true});
     this.interactable_objectsLayer = this.map.createLayer('interactable-objects', tilesetMiscObjects).setCollisionByProperty({ collides: true});
     this.playerLayer = this.add.layer();
+
     // gui gold
     this.add.image(230,130,"guiGold").setScrollFactor(0).setDepth(1);
-    this.goldPlayerGui = this.add.bitmapText(190,81, 'pixelFont', "", 25, 1).setDropShadow(4, 4, "#000", 1).setScrollFactor(0).setDepth(2);
+    this.goldPlayerGui = this.add.bitmapText(170,81, 'pixelFont', "", 25, 1).setDropShadow(4, 4, "#000", 1).setScrollFactor(0).setDepth(2);
     this.goldTeamNormalGui = this.add.bitmapText(170,117, 'pixelFont', "", 25, 1).setDropShadow(4, 4, "#000", 1).setScrollFactor(0).setDepth(2);
+    this.goldGoalTeamNormalGui = this.add.bitmapText(240,117, 'pixelFont', "/ " + this.goldGoalNormal, 25, 1).setDropShadow(4, 4, "#000", 1).setScrollFactor(0).setDepth(2);
     this.goldTeamImpostorGui = this.add.bitmapText(170,154, 'pixelFont', "", 25, 1).setDropShadow(4, 4, "#000", 1).setScrollFactor(0).setDepth(2);
+    this.goldGoalThievesGui = this.add.bitmapText(240,154, 'pixelFont', "/ " +this.goldGoalThieves, 25, 1).setDropShadow(4, 4, "#000", 1).setScrollFactor(0).setDepth(2);
 
     // console.log(this.oreLayer) // give an array of sprites
     const ORES_AMOUNT = 600;
@@ -337,8 +344,6 @@ export default class MainScene extends Phaser.Scene {
     });
     
     this.socket.on("save stolen money", function (data) {
-      console.log("llega");
-      console.log(data.gold);
       let total = parseInt(scene.goldPlayerGui._text, 10) + data.gold;
       scene.goldPlayerGui.setText(total)
     });
