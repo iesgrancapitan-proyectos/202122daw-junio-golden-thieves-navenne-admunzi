@@ -16,6 +16,7 @@ export default class LobbyScene extends Phaser.Scene {
     this.load.image("tiles", "assets/base-colour.png")
     this.load.image("tilesUnderBridge", "assets/base-colour-under-bridge.png")
     this.load.image("tilesOreVegetables", "assets/ores-vegetables-colour.png")
+    this.load.image("tilesMiscObjects", "assets/misc-objects.png")
     this.load.atlas("ore", "assets/ores.png", "assets/ores.json");
   }
 
@@ -106,6 +107,7 @@ export default class LobbyScene extends Phaser.Scene {
     const map = this.scene.get('MainScene').make.tilemap({ key: 'mine'})
     const tileset = map.addTilesetImage('base-colour', 'tiles')
     const tilesetUnderBridge = map.addTilesetImage('base-colour-under-bridge', 'tilesUnderBridge')
+    const tilesetMiscObjects = map.addTilesetImage('misc-objects', 'tilesMiscObjects')
 
     map.groundLayer = map.createLayer('ground', tileset)
     map.createLayer('outline-ground', tileset)
@@ -145,6 +147,7 @@ export default class LobbyScene extends Phaser.Scene {
 
     map.createLayer('fall', tileset).setCollisionByProperty({ collides: true});
     map.createLayer('walls', tileset).setCollisionByProperty({ collides: true});
+    map.createLayer('interactable-objects', tilesetMiscObjects).setCollisionByProperty({ collides: true});
 
     return map;
   }

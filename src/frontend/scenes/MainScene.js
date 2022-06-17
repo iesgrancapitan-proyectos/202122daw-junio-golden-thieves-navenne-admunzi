@@ -60,24 +60,6 @@ export default class MainScene extends Phaser.Scene {
   create() {
     const scene = this;
 
-    //  tilemap
-     this.map = this.make.tilemap({ key: 'mine'})
-    const tileset = this.map.addTilesetImage('base-colour', 'tiles')
-    const tilesetUnderBridge = this.map.addTilesetImage('base-colour-under-bridge', 'tilesUnderBridge')
-    const tilesetMiscObjects = this.map.addTilesetImage('misc-objects', 'tilesMiscObjects')
-
-    this.groundLayer = this.map.createLayer('ground', tileset)
-    this.map.createLayer('outline-ground', tileset)
-    this.map.createLayer('under-bridge', tilesetUnderBridge)
-    this.map.createLayer('bridge', tileset)
-
-    this.ores = this.physics.add.group({
-      classType: Ore,
-    });
-
-    this.fallLayer = this.map.createLayer('fall', tileset).setCollisionByProperty({ collides: true});
-    this.wallsLayer = this.map.createLayer('walls', tileset).setCollisionByProperty({ collides: true});
-    this.interactable_objectsLayer = this.map.createLayer('interactable-objects', tilesetMiscObjects).setCollisionByProperty({ collides: true});
     this.playerLayer = this.add.layer();
     // gui gold
     this.add.image(230,130,"guiGold").setScrollFactor(0).setDepth(1);
@@ -272,6 +254,7 @@ export default class MainScene extends Phaser.Scene {
       ore_to_delete.forEach((ore)=>{
         ore.disableBody(true, true);
       })
+    });
 
     this.socket.on("vote panel", function (playerData) {
       scene.otherPlayers.getChildren().forEach(function (otherPlayer) {
