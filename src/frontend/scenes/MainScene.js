@@ -70,6 +70,8 @@ export default class MainScene extends Phaser.Scene {
   create() {
     const scene = this;
 
+    this.playerLayer = this.add.layer();
+    
     // Goals
     this.goldGoalNormal = 2000;
     this.goldGoalThieves = 2000;
