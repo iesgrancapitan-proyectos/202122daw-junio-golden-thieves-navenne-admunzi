@@ -63,6 +63,8 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     // name
     this.label = this.scene.add.text(-50, -50, this.name).setOrigin(0.5, 1);
 
+    scene.playerLayer.add(this.label);
+
     // color
     this.setTint(this.color);
 

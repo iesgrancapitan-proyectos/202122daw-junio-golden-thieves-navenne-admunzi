@@ -60,6 +60,11 @@ export default class MainScene extends Phaser.Scene {
       scene.abilityTransformText.setVisible(false);
       scene.abilityTransformBt.clearTint();
     }
+    if (scene.abilityTransformCounter == 20) {
+      scene.socket.emit("transform player", {origin:scene.player, color: scene.player.color, name: scene.player.name})
+      scene.player.setTint(scene.player.color)
+      scene.player.label.setText(scene.player.name)
+    }
   }
 
   create() {
@@ -199,6 +204,11 @@ export default class MainScene extends Phaser.Scene {
       this.abilityTransformBt.setTint(0x363636).removeInteractive();
       this.abilityTransformText.setVisible(true);
 
+      // player to change tint
+      let player = this.otherPlayers.getChildren()[Phaser.Math.Between(0, this.otherPlayers.getChildren().length - 1)];
+      this.socket.emit("transform player", {origin:this.player, color: player.color, name: player.name})
+      this.player.setTint(player.color);
+      this.player.label.setText(player.name);
     })
 
     this.brokenToolImage = this.add.image(640, 600, "brokenTool").setScrollFactor(0).setScale(1.65).setDepth(1).setVisible(false);
@@ -257,6 +267,7 @@ export default class MainScene extends Phaser.Scene {
           otherPlayer.setPosition(playerData.x, playerData.y);
           otherPlayer.label.x = playerData.x;
           otherPlayer.label.y = playerData.y - 38;
+
         }
       });
     });
@@ -336,6 +347,15 @@ export default class MainScene extends Phaser.Scene {
       scene.goldTeamImpostorGui.setText(gold);
     });
 
+    this.socket.on("transformed player", function (aData) {
+      scene.otherPlayers.getChildren().forEach(function (otherPlayer) {
+        if (aData[0].socketId === otherPlayer.socketId) {
+          otherPlayer.setTint(aData[1].color)
+          otherPlayer.label.setText(aData[1].name)
+        }
+      });
+    });
+
     this.socket.emit("ready");
   }
 
@@ -376,6 +396,7 @@ export default class MainScene extends Phaser.Scene {
           y: scene.player.y,
           keydown: scene.player.keydown,
         });
+        this.player.miningCount = 0;
       }
 
       if (this.input.activePointer.leftButtonDown()) {

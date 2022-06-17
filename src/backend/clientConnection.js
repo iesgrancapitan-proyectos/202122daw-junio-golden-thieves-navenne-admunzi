@@ -176,7 +176,7 @@ export function clientConnection(io) {
       socketId: socket.id,
       loginTime: new Date().getTime(),
       x: Math.floor(Math.random() * (3015 - 2985) + 2985),
-      y: Math.floor(Math.random() * (2015 - 1985) + 1985),
+      y: Math.floor(Math.random() * (2100 - 2050) + 2050),
       keydown: "idle",
       name: playerName,
       color: getColor(playerNum),
