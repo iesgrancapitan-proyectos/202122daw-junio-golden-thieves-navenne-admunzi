@@ -41,6 +41,11 @@ export function gameCommunication(socket, roomInfo) {
     socket.to(roomInfo.roomKey).emit("player mined", roomInfo.players[socket.id]);
   });
 
+  // when a player transform
+  socket.on("transform player", function (data) {
+    socket.to(roomInfo.roomKey).emit("transformed player", [roomInfo.players[socket.id], data]);
+  });
+  
   // when a player stops mining, stop animation
   socket.on("player stop mining", function () {
     socket.to(roomInfo.roomKey).emit("player mine stopped", roomInfo.players[socket.id]);

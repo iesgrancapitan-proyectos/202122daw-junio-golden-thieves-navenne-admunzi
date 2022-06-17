@@ -55,6 +55,11 @@ export default class MainScene extends Phaser.Scene {
       scene.abilityTransformText.setVisible(false);
       scene.abilityTransformBt.clearTint();
     }
+    if (scene.abilityTransformCounter == 20) {
+      scene.socket.emit("transform player", {origin:scene.player, color: scene.player.color, name: scene.player.name})
+      scene.player.setTint(scene.player.color)
+      scene.player.label.setText(scene.player.name)
+    }
   }
 
   create() {
@@ -170,6 +175,11 @@ export default class MainScene extends Phaser.Scene {
       this.abilityTransformBt.setTint(0x363636).removeInteractive();
       this.abilityTransformText.setVisible(true);
 
+      // player to change tint
+      let player = this.otherPlayers.getChildren()[Phaser.Math.Between(0, this.otherPlayers.getChildren().length - 1)];
+      this.socket.emit("transform player", {origin:this.player, color: player.color, name: player.name})
+      this.player.setTint(player.color);
+      this.player.label.setText(player.name);
     })
     //CHECK COLLIDES WALLS
       // const debugGraphicsWALLS = this.add.graphics().setAlpha(0.75);
@@ -291,6 +301,15 @@ export default class MainScene extends Phaser.Scene {
     // when the goldTeamImpostorGui is uptaded
     this.socket.on("All update goldTeamImpostorGui", function (gold) {
       scene.goldTeamImpostorGui.setText(gold);
+    });
+
+    this.socket.on("transformed player", function (aData) {
+      scene.otherPlayers.getChildren().forEach(function (otherPlayer) {
+        if (aData[0].socketId === otherPlayer.socketId) {
+          otherPlayer.setTint(aData[1].color)
+          otherPlayer.label.setText(aData[1].name)
+        }
+      });
     });
 
     this.socket.emit("ready");
