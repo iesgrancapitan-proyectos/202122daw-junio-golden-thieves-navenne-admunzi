@@ -119,11 +119,14 @@ export default class LobbyScene extends Phaser.Scene {
       map.oresList = Array.from({length: ORES_AMOUNT});
       map.ores = []; 
 
+      // area dont spawn ores
+      let areaMainSpawn = new Phaser.Geom.Rectangle(2820, 1920, 450, 300);
+      
       map.oresList.forEach(value => {
         let x = -1;
         let y = -1;
   
-        while (!map.groundLayer.getTileAtWorldXY(x, y)) {
+        while (!map.groundLayer.getTileAtWorldXY(x, y) || areaMainSpawn.contains(x, y)) {
           x = Phaser.Math.Between(0, 6000);
           y = Phaser.Math.Between(0, 4000);
         }
