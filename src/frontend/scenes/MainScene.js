@@ -24,6 +24,7 @@ export default class MainScene extends Phaser.Scene {
     this.load.image("abilityStun", "assets/abilityStun.png")
     this.load.image("abilityTransform", "assets/abilityTransform.png")
     this.load.image("abilitySteal", "assets/abilitySteal.png")
+    this.load.image("brokenTool", "assets/brokenTool.png")
     this.load.bitmapFont("pixelFont", "fonts/pixel.png", "fonts/pixel.xml");
     this.load.image("guiGold", "assets/guiGold.png")
 
@@ -44,6 +45,9 @@ export default class MainScene extends Phaser.Scene {
       scene.abilityStunBt.setInteractive();
       scene.abilityStunText.setVisible(false);
       scene.abilityStunBt.clearTint();
+    }
+    if (scene.abilityStunCounter == 23) {
+      scene.abilityStealBt.setVisible(false);
     }
   }
 
@@ -146,8 +150,6 @@ export default class MainScene extends Phaser.Scene {
       height
     }, true)
 
-    console.log("entra");
-    
     // fill it with black
     this.rtFOV.fill(0x000000, 1)
 
@@ -188,7 +190,7 @@ export default class MainScene extends Phaser.Scene {
       this.abilityStunBtTimer = this.time.addEvent({ delay: 1000, repeat: 29, callback: this.abilityStunUpdateTimer, args: [this]})
       this.abilityStunBt.setTint(0x363636).setVisible(false);
       this.abilityStunText.setVisible(true);
-
+      this.abilityStunBt.removeInteractive();
       this.abilityStealBt.setVisible(true);
 
 
@@ -203,16 +205,14 @@ export default class MainScene extends Phaser.Scene {
 
     this.abilityStealBt.on("pointerup",()=>{
 
-      console.log(this.socket.id);
-
-      // //overlap players
+      // overlap players
       this.otherPlayers.children.each(function(player) {
         if(this.checkOverlapPlayers(this.player.range, player, this)){
           this.socket.emit("steal player", {objective: player.socketId, origin: this.socket.id});
           return false;
         }
       }, this);
-      this.abilityStunText.setAlpha(0.5)
+      this.abilityStunText.setAlpha(1)
       this.abilityStealBt.setVisible(false);
       this.abilityStunBt.setVisible(true);
     })
@@ -230,6 +230,9 @@ export default class MainScene extends Phaser.Scene {
       this.abilityTransformText.setVisible(true);
 
     })
+
+    this.brokenToolImage = this.add.image(640, 600, "brokenTool").setScrollFactor(0).setScale(1.65).setDepth(1).setVisible(false);
+
     //CHECK COLLIDES WALLS
       // const debugGraphicsWALLS = this.add.graphics().setAlpha(0.75);
       // this.wallsLayer.renderDebug(debugGraphicsWALLS, {
@@ -323,12 +326,14 @@ export default class MainScene extends Phaser.Scene {
     this.socket.on("broken tool", function () {
       if (!scene.player.thief) {
         scene.player.tool = false;
+        scene.brokenToolImage.setVisible(true);
       }
     });
 
     this.socket.on("stolen player", function (data) {
-      scene.socket.emit('send money stolen', data['gold'] = parseInt(scene.goldPlayerGui._text, 10));
+      data.gold = parseInt(scene.goldPlayerGui._text, 10)
       scene.goldPlayerGui.setText("0");
+      scene.socket.emit('send money stolen', data);
     });
     
     this.socket.on("save stolen money", function (data) {
