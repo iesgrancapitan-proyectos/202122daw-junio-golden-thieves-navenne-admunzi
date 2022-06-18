@@ -39,11 +39,13 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.range.setAlpha(0);
     this.range.body.setSize(this.width + 50, this.height + 50, -5, 0);
 
+    console.log(this.scene.socket);
+
     //overlap ores
     scene.physics.add.overlap(this.range, scene.ores, this.checkNearOre, () => {}, this);
     
     //  overlap vote
-    scene.physics.add.overlap(this.range, scene.voteObject, this.voteObjectInside, null, scene)    
+    scene.physics.add.overlap(this.range, scene.voteObject, this.voteObjectInside, null, scene)
     
     //  overlap anvil
     scene.physics.add.overlap(this.range, scene.anvilObject, this.anvilObjectInside, null, this)    
@@ -277,7 +279,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.scene.anvilObjectKeyEText.setVisible(true)
 
     if (Phaser.Input.Keyboard.JustDown(this.scene.keyE)) {
-      console.log("Interactuas");
+      console.log("Interactuas anvil");
       if (!this.tool) {
         let costTool = 20;
         let total = parseInt(this.scene.goldTeamNormalGui._text, 10) - costTool;
@@ -295,7 +297,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.scene.minecartGeneralObjectKeyEText.setVisible(true)
 
     if (Phaser.Input.Keyboard.JustDown(this.scene.keyE)) {
-      console.log("Interactuas");
+      console.log("Interactuas minecartGeneral");
       let gold = parseInt(this.scene.goldPlayerGui._text, 10) + parseInt(this.scene.goldTeamNormalGui._text, 10)
       this.scene.socket.emit("update goldTeamNormalGui",gold);
       this.scene.goldTeamNormalGui.setText(gold);
@@ -308,7 +310,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
       this.scene.minecartImpostorObjectKeyEText.setVisible(true)
 
       if (Phaser.Input.Keyboard.JustDown(this.scene.keyE)) {
-        console.log("Interactuas");
+        console.log("Interactuas minecartImpostor");
         let gold = parseInt(this.scene.goldPlayerGui._text, 10) + parseInt(this.scene.goldTeamImpostorGui._text, 10)
         this.scene.socket.emit("update goldTeamImpostorGui",gold);
         this.scene.goldTeamImpostorGui.setText(gold);
@@ -323,7 +325,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
       this.scene.buttonJailObjectKeyEText.setVisible(true)
 
       if (Phaser.Input.Keyboard.JustDown(this.scene.keyE)) {
-        console.log("Interactuas");
+        console.log("Interactuas buttonJail");
 
         // functionality overlap players with jail
         this.scene.otherPlayers.children.each(function(player) {
