@@ -39,8 +39,6 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.range.setAlpha(0);
     this.range.body.setSize(this.width + 50, this.height + 50, -5, 0);
 
-    console.log(this.scene.socket);
-
     //overlap ores
     scene.physics.add.overlap(this.range, scene.ores, this.checkNearOre, () => {}, this);
     
@@ -100,6 +98,21 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
           otherPlayer.range.y = otherPlayer.y;
         }
       });
+    });
+
+    scene.socket.on("check player stunned", function (origin) {
+      if (scene.player.stunned) {
+        scene.socket.emit("i am on the floor",origin)
+      }
+    });
+
+    scene.socket.on("on the floor", function () {
+      scene.voteButtom.clearTint().setInteractive();
+      scene.voteButtomCounter = 3;
+      if (scene.voteButtomTimer) {
+        scene.voteButtomTimer.remove(false);
+      }
+      scene.voteButtomTimer = scene.time.addEvent({ delay: 1000, repeat: 3, callback: scene.voteButtomUpdateTimer, args: [scene]})  
     });
 
     // Animations
@@ -188,6 +201,13 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
       this.scene.abilityStunBt.setVisible(true);
       this.scene.abilityTransformBt.setVisible(true)
     }
+
+    //overlap players to check if there is stunned player
+    this.scene.otherPlayers.children.each(function(player) {
+      if(this.scene.checkOverlapPlayers(this.range, player, this.scene)){
+        this.scene.socket.emit("player stunned", {origin:this.socketId, objective: player.socketId});    
+      }
+    }, this);
 
     //Camera Follow
     this.scene.cameras.main.startFollow(this, true, 0.05, 0.05);

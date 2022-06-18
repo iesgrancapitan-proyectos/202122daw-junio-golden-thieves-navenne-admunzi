@@ -26,6 +26,7 @@ export default class MainScene extends Phaser.Scene {
     this.load.image("abilityStun", "assets/abilityStun.png")
     this.load.image("abilityTransform", "assets/abilityTransform.png")
     this.load.image("abilitySteal", "assets/abilitySteal.png")
+    this.load.image("voteButton", "assets/voteButton.png")
     this.load.image("brokenTool", "assets/brokenTool.png")
     this.load.bitmapFont("pixelFont", "fonts/pixel.png", "fonts/pixel.xml");
     this.load.image("guiGold", "assets/guiGold.png")
@@ -67,6 +68,12 @@ export default class MainScene extends Phaser.Scene {
     }
   }
 
+  voteButtomUpdateTimer(scene){
+    --scene.voteButtomCounter
+    if (scene.voteButtomCounter == 0) {
+      scene.voteButtom.removeInteractive().setTint(0x363636);
+    }
+  }
   create() {
     const scene = this;
 
@@ -213,8 +220,15 @@ export default class MainScene extends Phaser.Scene {
       this.player.label.setText(player.name);
     })
 
-    this.brokenToolImage = this.add.image(640, 600, "brokenTool").setScrollFactor(0).setScale(1.65).setDepth(1).setVisible(false);
+    this.brokenToolImage = this.add.image(720, 600, "brokenTool").setScrollFactor(0).setScale(1.65).setDepth(1).setVisible(false);
 
+    this.voteButtom = this.add.image(800, 600 , 'voteButton').setScrollFactor(0).setScale(1.65).setDepth(1).setVisible(true).setTint(0x363636);
+    
+    // add event click vote buttom
+    this.voteButtom.on("pointerup",()=>{
+      console.log("tira vote");
+    })
+    
     //CHECK COLLIDES WALLS
       // const debugGraphicsWALLS = this.add.graphics().setAlpha(0.75);
       // this.wallsLayer.renderDebug(debugGraphicsWALLS, {

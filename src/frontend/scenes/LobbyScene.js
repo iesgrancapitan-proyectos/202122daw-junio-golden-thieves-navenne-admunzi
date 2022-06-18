@@ -136,9 +136,7 @@ export default class LobbyScene extends Phaser.Scene {
         ore.body.setImmovable();
         ore.body.setAllowGravity(false);
         map.ores.push({x, y, frame})
-      }
-      
-      );
+      });
     } else {
       oresList.forEach((ore)=>{
         let ore2 = this.ores.create(ore.x, ore.y, "ore", `ore_${ore.frame}.png`)
