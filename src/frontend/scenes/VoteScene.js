@@ -30,28 +30,24 @@ export default class VoteScene extends Phaser.Scene {
         createText(scene, 0.5, 0.2, "Vote to jail", 50, true, 5);
         this.add.image(WIDTH / 2, HEIGHT / 2, 'votePanelBackground').setOrigin(0.5, 0.5).setDepth(0).setScale(3);
 
-        const players = this.otherPlayers.getChildren();
+        this.players = this.otherPlayers.getChildren();
         let playerIndex = 0;
         let playerImages = [];
+        console.log(this.players);
         for (let row = 0; row < 3; row++) {
             for (let col = 0; col < 4; col++) {
-                if (playerIndex == players.length) break
+                if (playerIndex == this.players.length) break
                 let widthFactor = (((col + 1) / 12.8) + 0.308);
                 let heightFactor = (((row + 1) / 7.2) + 0.233);
-                const player = scene.add.image(WIDTH * widthFactor, HEIGHT * heightFactor, 'player', 'right_idle_1.png').setOrigin(0.5, 0.5).setScale(2).setTint(players[playerIndex].color);
+                const player = scene.add.image(WIDTH * widthFactor, HEIGHT * heightFactor, 'player', 'right_idle_1.png').setOrigin(0.5, 0.5).setScale(2).setTint(scene.players[playerIndex].color);
+                player.socketId = this.players[playerIndex].socketId;
                 playerImages.push(player);
                 player.setInteractive({ useHandCursor: true  });
-                player.once('pointerdown', sendVote, this);
-                function sendVote() {
-                    scene.socket.emit('vote', players[playerIndex-1].socketId);
-                    player.setAlpha(0.5);
-                    scene.add.image(player.x, player.y, 'votedIcon').setOrigin(0.5, 0.5);
-                    playerImages.forEach(image => {
-                        image.input.enable = false;
-                        image.input.enabled = false;
-                    });
-                }
-                createText(scene, widthFactor - 0.0048, heightFactor - 0.055, players[playerIndex].name, 20, true, 2);
+                player.addListener('pointerdown', function () {
+                    scene.sendVote(player, playerImages);
+                });
+                
+                createText(scene, widthFactor - 0.0048, heightFactor - 0.055, scene.players[playerIndex].name, 20, true, 2);
                 ++playerIndex;
             }
         }
@@ -67,6 +63,17 @@ export default class VoteScene extends Phaser.Scene {
 
     update() {
 
+    }
+
+    sendVote(player, playerImages) {
+        
+        playerImages.forEach(image => {
+            image.removeListener('pointerdown');
+            image.input.enabled = false;
+        });
+        this.socket.emit('vote', player.socketId);
+        player.setAlpha(0.5);
+        this.add.image(player.x, player.y, 'votedIcon').setOrigin(0.5, 0.5);
     }
 
     updateTimer(scene) {
