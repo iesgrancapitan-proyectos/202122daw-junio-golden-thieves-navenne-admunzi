@@ -303,8 +303,8 @@ export default class MainScene extends Phaser.Scene {
 
     this.socket.on("vote panel", function (playerData) {
       scene.otherPlayers.getChildren().forEach(function (otherPlayer) {
-        scene.scene.launch('VoteScene',this);
-
+        scene.scene.pause('MainScene');
+        scene.scene.launch('VoteScene', { socket: scene.socket, player: scene.player, otherPlayers: scene.otherPlayers});
       });
     });
 
@@ -426,11 +426,13 @@ export default class MainScene extends Phaser.Scene {
 
   // add any additional players
   addOtherPlayers(id, playerData) {
-    this.otherPlayer = new Player(this, id, playerData);
-    this.otherPlayer.label.x = playerData.x;
-    this.otherPlayer.label.y = playerData.y - 38;
-    this.otherPlayer.anims.play("right_idle", true);
-    this.otherPlayers.add(this.otherPlayer);
+    if (!this.otherPlayers.getChildren().find((otherPlayer) => id == otherPlayer.socketId)) {
+      this.otherPlayer = new Player(this, id, playerData);
+      this.otherPlayer.label.x = playerData.x;
+      this.otherPlayer.label.y = playerData.y - 38;
+      this.otherPlayer.anims.play("right_idle", true);
+      this.otherPlayers.add(this.otherPlayer);  
+    }
   }
 
   checkOverlapPlayers(range, otherPlayer, scene) {

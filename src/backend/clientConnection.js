@@ -1,5 +1,5 @@
 import { gameCommunication } from "./gameCommunication";
-import { getColor } from "../frontend/functions";
+import { getColor } from "../utils/functions";
 
 export function clientConnection(io) {
   let gameRooms = {};

@@ -1,5 +1,5 @@
 import Ore from "../objects/Ore"
-import { createText } from "../functions";
+import { createText } from "../../utils/functions";
 import io from "socket.io-client";
 export default class LobbyScene extends Phaser.Scene {
   constructor() {

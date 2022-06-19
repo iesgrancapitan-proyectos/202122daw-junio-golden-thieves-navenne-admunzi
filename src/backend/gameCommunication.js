@@ -23,7 +23,7 @@ export function gameCommunication(socket, roomInfo) {
 
   // when a player opens a vote
   socket.on("vote panels", function () {
-    socket.broadcast.emit("vote panel");
+    socket.to(roomInfo.roomKey).emit("vote panel");
   });
 
   // when a player update the gold team normal
