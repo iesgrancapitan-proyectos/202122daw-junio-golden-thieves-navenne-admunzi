@@ -1,5 +1,4 @@
 import Player from "../objects/Player";
-import Ore from "../objects/Ore";
 
 export default class MainScene extends Phaser.Scene {
   constructor() {
@@ -71,6 +70,7 @@ export default class MainScene extends Phaser.Scene {
     const scene = this;
 
     this.playerLayer = this.add.layer();
+    this.votingPanelEnabled = true;
     
     // Goals
     this.goldGoalNormal = 2000;
@@ -301,7 +301,7 @@ export default class MainScene extends Phaser.Scene {
       })
     });
 
-    this.socket.on("vote panel", function (playerData) {
+    this.socket.on("vote panel", function () {
       if (!scene.player.inJail) {
         scene.scene.pause('MainScene');
         scene.scene.launch('VoteScene', { socket: scene.socket, player: scene.player, otherPlayers: scene.otherPlayers});
@@ -340,6 +340,7 @@ export default class MainScene extends Phaser.Scene {
     this.socket.on("update inJail", function (player) {
       scene.otherPlayers.getChildren().forEach(function (otherPlayer) {
         if (player.socketId === otherPlayer.socketId) {
+          console.log("kk");
           otherPlayer.inJail = player.inJail;
         }
       }); 
@@ -373,6 +374,14 @@ export default class MainScene extends Phaser.Scene {
           otherPlayer.label.setText(aData[1].name)
         }
       });
+    });
+
+    this.socket.on("disable voting panel", function () {
+      scene.votingPanelEnabled = false;
+    });
+
+    this.socket.on("enable voting panel", function () {
+      scene.votingPanelEnabled = true;
     });
 
     this.socket.emit("ready");

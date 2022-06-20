@@ -39,8 +39,8 @@ export default class VoteScene extends Phaser.Scene {
     let playerImages = [];
 
     this.socket.on("timer", function (timer) {
-      if (!scene.player.inJail) {
-        scene.updateTimer(timer);        
+      if (scene.player.scene.scene.isActive("VoteScene")) {
+        scene.updateTimer(timer);
       }
     });
 
@@ -48,7 +48,7 @@ export default class VoteScene extends Phaser.Scene {
 
     const interval = setInterval(() => {
       timer--;
-      if (timer > -1) {
+      if (timer > -1 && scene.player.scene.scene.isActive("VoteScene")) {
         this.updateTimer(timer);
       }
       if (timer == 0) clearInterval(interval);
@@ -56,7 +56,6 @@ export default class VoteScene extends Phaser.Scene {
 
     this.socket.on("count votes", function (socketId) {
       const vote = scene.votes.find((vote) => vote.socketId === socketId)
-
       if (vote) {
         vote.votes++;
       } else {
@@ -150,7 +149,6 @@ export default class VoteScene extends Phaser.Scene {
       const playerInJail = this.allPlayers.find((player)=> player.inJail == true )
       if (playerInJail) this.socket.emit("leave jail", playerInJail.socketId); 
       this.socket.emit("enter jail", socketId);
-
     
     } else {
       this.resultText.setText("No one goes to jail");

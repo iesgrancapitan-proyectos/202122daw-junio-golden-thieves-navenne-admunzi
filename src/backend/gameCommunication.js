@@ -76,4 +76,14 @@ export function gameCommunication(socket, roomInfo) {
       if (timer == 0) clearInterval(interval);
     }, 1000);
   });
+
+  // disable voting panel for all players
+  socket.on("voting panel disabled", function () {
+    socket.to(roomInfo.roomKey).emit("disable voting panel");
+  });
+
+  // enable voting panel for all players
+  socket.on("voting panel enabled", function () {
+    socket.to(roomInfo.roomKey).emit("enable voting panel");
+  });
 }
