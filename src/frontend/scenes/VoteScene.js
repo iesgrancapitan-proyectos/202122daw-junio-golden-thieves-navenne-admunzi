@@ -20,32 +20,33 @@ export default class VoteScene extends Phaser.Scene {
     const scene = this;
 
     this.votes = [];
-    this.timerCounterText = createText(scene, 0.7, 0.29, "30", 30, true, 3);
+    this.timerCounterText = createText(scene, 0.7, 0.29, "", 30, true, 3);
 
     const WIDTH = this.renderer.width;
     const HEIGHT = this.renderer.height;
 
     this.primaryText = createText(scene, 0.5, 0.2, "Vote to jail", 50, true, 5);
+    this.resultText = createText(scene, 0.5, 0.1, "", 40, true, 5);
+
     this.add
       .image(WIDTH / 2, HEIGHT / 2, "votePanelBackground")
       .setOrigin(0.5, 0.5)
       .setDepth(0)
       .setScale(3);
 
-    this.players = this.otherPlayers.getChildren();
+    this.playersNotInJail = this.otherPlayers.getChildren().filter((player) => !player.inJail );
+    console.log(this.otherPlayers.getChildren());
     let playerIndex = 0;
     let playerImages = [];
 
     this.socket.on("timer", function (timer) {
-      console.log(timer);
       scene.updateTimer(timer);
     });
 
     let timer = 30;
 
-    setInterval(() => {
+    const interval = setInterval(() => {
       timer--;
-      console.log(timer);
       if (timer > -1) {
         this.updateTimer(timer);
       }
@@ -64,7 +65,7 @@ export default class VoteScene extends Phaser.Scene {
 
     for (let row = 0; row < 3; row++) {
       for (let col = 0; col < 4; col++) {
-        if (playerIndex == this.players.length) break;
+        if (playerIndex == this.playersNotInJail.length) break;
 
         let widthFactor = (col + 1) / 12.8 + 0.308;
         let heightFactor = (row + 1) / 7.2 + 0.233;
@@ -73,9 +74,9 @@ export default class VoteScene extends Phaser.Scene {
           .image(WIDTH * widthFactor, HEIGHT * heightFactor, "player", "right_idle_1.png")
           .setOrigin(0.5, 0.5)
           .setScale(2)
-          .setTint(scene.players[playerIndex].color);
+          .setTint(scene.playersNotInJail[playerIndex].color);
 
-        player.socketId = this.players[playerIndex].socketId;
+        player.socketId = this.playersNotInJail[playerIndex].socketId;
         playerImages.push(player);
 
         player.setInteractive({
@@ -86,7 +87,7 @@ export default class VoteScene extends Phaser.Scene {
           scene.sendVote(player, playerImages);
         });
 
-        createText(scene, widthFactor - 0.0048, heightFactor - 0.055, scene.players[playerIndex].name, 20, true, 2);
+        createText(scene, widthFactor - 0.0048, heightFactor - 0.055, scene.playersNotInJail[playerIndex].name, 20, true, 2);
 
         ++playerIndex;
       }
@@ -94,12 +95,19 @@ export default class VoteScene extends Phaser.Scene {
   }
 
   sendVote(player, playerImages) {
+    const scene = this;
     playerImages.forEach((image) => {
       image.removeListener("pointerdown");
       image.input.enabled = false;
       image.input.enable = false;
     });
     this.socket.emit("vote", player.socketId);
+    const vote = scene.votes.find((vote) => vote.socketId === player.socketId)
+    if (vote) {
+      vote.votes++;
+    } else {
+      scene.votes.push({ socketId: player.socketId, votes: 1 });
+    }
     player.setAlpha(0.5);
     this.add.image(player.x, player.y, "votedIcon").setOrigin(0.5, 0.5);
   }
@@ -131,20 +139,16 @@ export default class VoteScene extends Phaser.Scene {
       }
     });
 
-    // console.log("selected",selected);
-    // console.log("votes",this.votes);
-    // console.log("maxVotes",maxVotes);
-
     if (selected.length == 1) {
       const socketId = selected[0].socketId;
 
       const playerToJail = this.allPlayers.find((player) => player.socketId == socketId);
 
-      this.primaryText.setText(`${playerToJail.name} goes to jail`);
+      this.resultText.setText(`${playerToJail.name} goes to jail`);
       this.socket.emit("enter jail", socketId);
     
     } else {
-      this.primaryText.setText("No one goes to jail");
+      this.resultText.setText("No one goes to jail");
     }
   }
 }

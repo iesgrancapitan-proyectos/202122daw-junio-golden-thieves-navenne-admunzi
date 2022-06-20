@@ -326,11 +326,22 @@ export default class MainScene extends Phaser.Scene {
     this.socket.on("i am out jail", function () {
       scene.player.x = 3050;
       scene.player.y = 2080;
+      scene.player.inJail = false;
     });
     
     this.socket.on("i am in jail", function () {
       scene.player.x = 3160;
       scene.player.y = 2040;
+      scene.player.inJail = true;
+      scene.socket.emit("update players", { socketId: scene.player.socketId, inJail: scene.player.inJail });
+    });
+
+    this.socket.on("update inJail", function (player) {
+      scene.otherPlayers.getChildren().forEach(function (otherPlayer) {
+        if (player.socketId === otherPlayer.socketId) {
+          otherPlayer.inJail = player.inJail;
+        }
+      });      
     });
     
     this.socket.on("stolen player", function (data) {

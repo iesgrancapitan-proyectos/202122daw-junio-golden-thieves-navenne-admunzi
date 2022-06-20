@@ -148,7 +148,7 @@ export function clientConnection(io) {
     });
 
     socket.on("enter jail", function (id) {
-      // enter player in jail
+      // put player in jail
       io.to(id).emit('i am in jail');
     });
 
@@ -186,6 +186,7 @@ export function clientConnection(io) {
       name: playerName,
       color: getColor(playerNum),
       thief: false,
+      inJail: false,
     });
   }
 

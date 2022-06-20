@@ -22,6 +22,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.stunned = false;
     this.tool = true;
     this.thief = data.thief;
+    this.inJail = data.inJail;
 
     // colliders
     // scene.physics.add.collider(this, scene.wallsLayer);

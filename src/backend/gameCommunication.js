@@ -26,6 +26,10 @@ export function gameCommunication(socket, roomInfo) {
     socket.to(roomInfo.roomKey).emit("vote panel");
   });
 
+  socket.on("update players", function (player) {
+    socket.to(roomInfo.roomKey).emit("update inJail", { socketId: player.socketId, inJail: player.inJail });
+  });
+
   // when a player update the gold team normal
   socket.on("update goldTeamNormalGui", function (gold) {
     socket.to(roomInfo.roomKey).emit("All update goldTeamNormalGui", gold);
