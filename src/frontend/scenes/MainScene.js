@@ -302,10 +302,10 @@ export default class MainScene extends Phaser.Scene {
     });
 
     this.socket.on("vote panel", function (playerData) {
-      scene.otherPlayers.getChildren().forEach(function (otherPlayer) {
+      if (!scene.player.inJail) {
         scene.scene.pause('MainScene');
         scene.scene.launch('VoteScene', { socket: scene.socket, player: scene.player, otherPlayers: scene.otherPlayers});
-      });
+      }
     });
 
     this.socket.on("i am stunned", function () {
@@ -327,6 +327,7 @@ export default class MainScene extends Phaser.Scene {
       scene.player.x = 3050;
       scene.player.y = 2080;
       scene.player.inJail = false;
+      scene.socket.emit("update players", { socketId: scene.player.socketId, inJail: scene.player.inJail });
     });
     
     this.socket.on("i am in jail", function () {
@@ -341,7 +342,7 @@ export default class MainScene extends Phaser.Scene {
         if (player.socketId === otherPlayer.socketId) {
           otherPlayer.inJail = player.inJail;
         }
-      });      
+      }); 
     });
     
     this.socket.on("stolen player", function (data) {

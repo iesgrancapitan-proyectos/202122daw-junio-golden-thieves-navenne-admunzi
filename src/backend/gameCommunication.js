@@ -66,7 +66,7 @@ export function gameCommunication(socket, roomInfo) {
 
   // count total votes
   socket.on("start timer", function () {
-    let timer = 30;
+    let timer = 10;
 
     const interval = setInterval(() => {
       timer--;

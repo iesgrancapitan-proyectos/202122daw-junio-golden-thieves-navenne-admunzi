@@ -332,6 +332,8 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         this.scene.otherPlayers.children.each(function(player) {
           if(this.scene.checkOverlapJail(player.range, this.scene.areaJail)){
             this.scene.socket.emit("leave jail", player.socketId);
+            player.inJail = false;
+            this.scene.socket.emit("update players", { socketId: player.socketId, inJail: player.inJail });
             player.x = 3050;
             player.y = 2080;
           }
