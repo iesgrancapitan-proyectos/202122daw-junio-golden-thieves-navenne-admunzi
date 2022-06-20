@@ -1,86 +1,150 @@
-import {
-    createText
-} from "../../utils/functions";
+import { createText } from "../../utils/functions";
 export default class VoteScene extends Phaser.Scene {
-    constructor() {
-        super("VoteScene");
-    }
+  constructor() {
+    super("VoteScene");
+  }
 
-    init(data) {
-        this.socket = data.socket;
-        this.player = data.player;
-        this.otherPlayers = data.otherPlayers;
-    }
+  init(data) {
+    this.socket = data.socket;
+    this.player = data.player;
+    this.otherPlayers = data.otherPlayers;
+    this.allPlayers = [this.player, ...this.otherPlayers.getChildren()];
+  }
 
-    preload() {
-        this.load.image("votePanelBackground", "assets/votePanel.png");
-        this.load.image("votedIcon", "assets/VoteScene/voted.png")
-    }
+  preload() {
+    this.load.image("votePanelBackground", "assets/votePanel.png");
+    this.load.image("votedIcon", "assets/VoteScene/voted.png");
+  }
 
-    create() {
-        const scene = this;
+  create() {
+    const scene = this;
 
-        this.timerCounter = 30;
+    this.votes = [];
+    this.timerCounterText = createText(scene, 0.7, 0.29, "30", 30, true, 3);
 
-        this.timerCounterText = createText(scene, 0.7, 0.29, this.timerCounter, 30, true, 3);
+    const WIDTH = this.renderer.width;
+    const HEIGHT = this.renderer.height;
 
-        const WIDTH = this.renderer.width;
-        const HEIGHT = this.renderer.height;
+    this.primaryText = createText(scene, 0.5, 0.2, "Vote to jail", 50, true, 5);
+    this.add
+      .image(WIDTH / 2, HEIGHT / 2, "votePanelBackground")
+      .setOrigin(0.5, 0.5)
+      .setDepth(0)
+      .setScale(3);
 
-        createText(scene, 0.5, 0.2, "Vote to jail", 50, true, 5);
-        this.add.image(WIDTH / 2, HEIGHT / 2, 'votePanelBackground').setOrigin(0.5, 0.5).setDepth(0).setScale(3);
+    this.players = this.otherPlayers.getChildren();
+    let playerIndex = 0;
+    let playerImages = [];
 
-        this.players = this.otherPlayers.getChildren();
-        let playerIndex = 0;
-        let playerImages = [];
-        console.log(this.players);
-        for (let row = 0; row < 3; row++) {
-            for (let col = 0; col < 4; col++) {
-                if (playerIndex == this.players.length) break
-                let widthFactor = (((col + 1) / 12.8) + 0.308);
-                let heightFactor = (((row + 1) / 7.2) + 0.233);
-                const player = scene.add.image(WIDTH * widthFactor, HEIGHT * heightFactor, 'player', 'right_idle_1.png').setOrigin(0.5, 0.5).setScale(2).setTint(scene.players[playerIndex].color);
-                player.socketId = this.players[playerIndex].socketId;
-                playerImages.push(player);
-                player.setInteractive({ useHandCursor: true  });
-                player.addListener('pointerdown', function () {
-                    scene.sendVote(player, playerImages);
-                });
-                
-                createText(scene, widthFactor - 0.0048, heightFactor - 0.055, scene.players[playerIndex].name, 20, true, 2);
-                ++playerIndex;
-            }
-        }
-        this.time.addEvent({
-            delay: 1000,
-            repeat: 29,
-            callback: this.updateTimer,
-            args: [this]
-        })
+    this.socket.on("timer", function (timer) {
+      console.log(timer);
+      scene.updateTimer(timer);
+    });
 
+    let timer = 30;
 
-    }
+    setInterval(() => {
+      timer--;
+      console.log(timer);
+      if (timer > -1) {
+        this.updateTimer(timer);
+      }
+      if (timer == 0) clearInterval(interval);
+    }, 1000);
 
-    update() {
+    this.socket.on("count votes", function (socketId) {
+      const vote = scene.votes.find((vote) => vote.socketId === socketId)
 
-    }
+      if (vote) {
+        vote.votes++;
+      } else {
+        scene.votes.push({ socketId: socketId, votes: 1 });
+      }
+    });
 
-    sendVote(player, playerImages) {
-        
-        playerImages.forEach(image => {
-            image.removeListener('pointerdown');
-            image.input.enabled = false;
+    for (let row = 0; row < 3; row++) {
+      for (let col = 0; col < 4; col++) {
+        if (playerIndex == this.players.length) break;
+
+        let widthFactor = (col + 1) / 12.8 + 0.308;
+        let heightFactor = (row + 1) / 7.2 + 0.233;
+
+        const player = scene.add
+          .image(WIDTH * widthFactor, HEIGHT * heightFactor, "player", "right_idle_1.png")
+          .setOrigin(0.5, 0.5)
+          .setScale(2)
+          .setTint(scene.players[playerIndex].color);
+
+        player.socketId = this.players[playerIndex].socketId;
+        playerImages.push(player);
+
+        player.setInteractive({
+          useHandCursor: true,
         });
-        this.socket.emit('vote', player.socketId);
-        player.setAlpha(0.5);
-        this.add.image(player.x, player.y, 'votedIcon').setOrigin(0.5, 0.5);
-    }
 
-    updateTimer(scene) {
-        scene.timerCounterText.setText(--scene.timerCounter);
-        if (scene.timerCounter == 0) {
-            scene.scene.stop("VoteScene");
-            scene.scene.resume("MainScene");
-        }
+        player.addListener("pointerdown", function () {
+          scene.sendVote(player, playerImages);
+        });
+
+        createText(scene, widthFactor - 0.0048, heightFactor - 0.055, scene.players[playerIndex].name, 20, true, 2);
+
+        ++playerIndex;
+      }
     }
+  }
+
+  sendVote(player, playerImages) {
+    playerImages.forEach((image) => {
+      image.removeListener("pointerdown");
+      image.input.enabled = false;
+      image.input.enable = false;
+    });
+    this.socket.emit("vote", player.socketId);
+    player.setAlpha(0.5);
+    this.add.image(player.x, player.y, "votedIcon").setOrigin(0.5, 0.5);
+  }
+
+  updateTimer(timer) { 
+    this.timerCounterText.setText(timer)
+    if (timer == 0) {
+      this.votingResults();
+      setTimeout(() => {
+        this.scene.stop("VoteScene");
+        this.scene.resume("MainScene");
+      }, 10000);
+    }
+  }
+
+  votingResults() {
+    //get max votes
+
+    let maxVotes = 0;
+    let selected = [];
+
+    this.votes.forEach((vote) => {
+      if (vote.votes == maxVotes) {
+        selected.push(vote)
+      } else if (vote.votes > maxVotes) {
+        maxVotes = vote.votes;
+        selected = []
+        selected.push(vote)
+      }
+    });
+
+    // console.log("selected",selected);
+    // console.log("votes",this.votes);
+    // console.log("maxVotes",maxVotes);
+
+    if (selected.length == 1) {
+      const socketId = selected[0].socketId;
+
+      const playerToJail = this.allPlayers.find((player) => player.socketId == socketId);
+
+      this.primaryText.setText(`${playerToJail.name} goes to jail`);
+      this.socket.emit("enter jail", socketId);
+    
+    } else {
+      this.primaryText.setText("No one goes to jail");
+    }
+  }
 }

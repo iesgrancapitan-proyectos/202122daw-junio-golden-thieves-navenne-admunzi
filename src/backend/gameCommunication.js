@@ -35,7 +35,7 @@ export function gameCommunication(socket, roomInfo) {
   socket.on("update goldTeamImpostorGui", function (gold) {
     socket.to(roomInfo.roomKey).emit("All update goldTeamImpostorGui", gold);
   });
-  
+
   // when a player mines, play animation
   socket.on("player mining", function () {
     socket.to(roomInfo.roomKey).emit("player mined", roomInfo.players[socket.id]);
@@ -45,13 +45,31 @@ export function gameCommunication(socket, roomInfo) {
   socket.on("transform player", function (data) {
     socket.to(roomInfo.roomKey).emit("transformed player", [roomInfo.players[socket.id], data]);
   });
-  
+
   // when a player stops mining, stop animation
   socket.on("player stop mining", function () {
     socket.to(roomInfo.roomKey).emit("player mine stopped", roomInfo.players[socket.id]);
   });
 
   socket.on("disable ore", function (ore) {
-    socket.to(roomInfo.roomKey).emit("delete ore", ore)
-  })
+    socket.to(roomInfo.roomKey).emit("delete ore", ore);
+  });
+
+  // count total votes
+  socket.on("vote", function (socketId) {
+    socket.to(roomInfo.roomKey).emit("count votes", socketId);
+  });
+
+  // count total votes
+  socket.on("start timer", function () {
+    let timer = 30;
+
+    const interval = setInterval(() => {
+      timer--;
+      if (timer > -1) {
+        socket.to(roomInfo.roomKey).emit("timer", timer);
+      }
+      if (timer == 0) clearInterval(interval);
+    }, 1000);
+  });
 }

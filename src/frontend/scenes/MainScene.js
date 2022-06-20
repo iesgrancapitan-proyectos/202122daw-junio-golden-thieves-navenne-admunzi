@@ -328,6 +328,11 @@ export default class MainScene extends Phaser.Scene {
       scene.player.y = 2080;
     });
     
+    this.socket.on("i am in jail", function () {
+      scene.player.x = 3160;
+      scene.player.y = 2040;
+    });
+    
     this.socket.on("stolen player", function (data) {
       data.gold = parseInt(scene.goldPlayerGui._text, 10)
       scene.goldPlayerGui.setText("0");

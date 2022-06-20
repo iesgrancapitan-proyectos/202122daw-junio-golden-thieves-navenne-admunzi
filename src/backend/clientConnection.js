@@ -147,6 +147,11 @@ export function clientConnection(io) {
       io.to(id).emit('i am out jail');
     });
 
+    socket.on("enter jail", function (id) {
+      // enter player in jail
+      io.to(id).emit('i am in jail');
+    });
+
     // when a player use break tool ability
     socket.on("breakTool player", function (id) {
       // emit break tool to the player

@@ -269,6 +269,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
 
     if (Phaser.Input.Keyboard.JustDown(this.keyE)) {
       this.socket.emit("vote panels");
+      this.socket.emit("start timer");
       this.scene.pause('MainScene');
       this.scene.launch('VoteScene', { socket: this.socket, player: this.player, otherPlayers: this.otherPlayers});
     }
