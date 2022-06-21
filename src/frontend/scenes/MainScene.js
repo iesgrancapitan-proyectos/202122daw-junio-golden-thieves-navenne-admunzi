@@ -220,23 +220,6 @@ export default class MainScene extends Phaser.Scene {
       this.scene.launch('VoteScene', { socket: this.socket, player: this.player, otherPlayers: this.otherPlayers});
     })
     
-    //CHECK COLLIDES WALLS
-      // const debugGraphicsWALLS = this.add.graphics().setAlpha(0.75);
-      // this.wallsLayer.renderDebug(debugGraphicsWALLS, {
-      //   tileColor: null, // Color of non-colliding tiles
-      //   collidingTileColor: new Phaser.Display.Color(243, 134, 48, 255), // Color of colliding tiles
-      //   faceColor: new Phaser.Display.Color(40, 39, 37, 255) // Color of colliding face edges
-      // });
-
-    //CHECK COLLIDES FALLS
-      // const debugGraphicsFALLS = this.add.graphics().setAlpha(0.75);
-      // this.fallLayer.renderDebug(debugGraphicsFALLS, {
-      //   tileColor: null, // Color of non-colliding tiles
-      //   collidingTileColor: new Phaser.Display.Color(154, 239, 48, 255), // Color of colliding tiles
-      //   faceColor: new Phaser.Display.Color(40, 39, 37, 255) // Color of colliding face edges
-      // });
-
-    //this.physics.world.setBounds(0, 0, this.wallsLayer.width, this.wallsLayer.height);
     this.otherPlayers = this.physics.add.group();
 
     this.cursors = this.input.keyboard.addKeys({ up: "W", left: "A", down: "S", right: "D" , interact: "E"});
@@ -255,10 +238,6 @@ export default class MainScene extends Phaser.Scene {
       });
     });
 
-    // this.socket.on("new player", (id, playerData) => {
-    //   scene.addOtherPlayers(id, playerData);
-    // });
-
     this.socket.on("disconnected", (roomInfo) => {
       scene.otherPlayers.getChildren().forEach(function (otherPlayer) {
         if (roomInfo.socketId === otherPlayer.socketId) {
@@ -268,7 +247,6 @@ export default class MainScene extends Phaser.Scene {
     });
 
     this.socket.on("player moved", function (playerData) {
-      console.log(playerData);
       scene.otherPlayers.getChildren().forEach(function (otherPlayer) {
         if (playerData.socketId === otherPlayer.socketId) {
           otherPlayer.anims.play(playerData.keydown, true);
@@ -346,7 +324,6 @@ export default class MainScene extends Phaser.Scene {
     this.socket.on("update inJail", function (player) {
       scene.otherPlayers.getChildren().forEach(function (otherPlayer) {
         if (player.socketId === otherPlayer.socketId) {
-          console.log("kk");
           otherPlayer.inJail = player.inJail;
         }
       }); 

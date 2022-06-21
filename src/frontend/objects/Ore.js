@@ -15,8 +15,6 @@ export default class Ore extends Phaser.Physics.Arcade.Sprite {
       // enable physics
       scene.physics.world.enable(this);
 
-      
-
       this.setScale(1.5);
 
       scene.add.existing(this);
