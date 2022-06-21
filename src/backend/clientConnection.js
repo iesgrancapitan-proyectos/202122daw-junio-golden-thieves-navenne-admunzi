@@ -158,10 +158,16 @@ export function clientConnection(io) {
       io.to(id).emit('broken tool', null , function(data) {});
     });
 
+    socket.on("player stunned", function (data) {
+      io.to(data.objective).emit('check player stunned', data.origin , function() {});
+    });
+
+    socket.on("i am on the floor", function (origin) {
+      io.to(origin).emit('on the floor', null , function() {});
+    });
+    
     // when a player use steal ability
     socket.on("steal player", function (data) {
-      console.log(data);
-      console.log("steal player");
       io.to(data.objective).emit('stolen player', data);
     });
 

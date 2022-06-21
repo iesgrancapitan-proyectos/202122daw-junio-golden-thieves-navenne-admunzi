@@ -2,7 +2,7 @@ export function gameCommunication(socket, roomInfo) {
   //when the scene is ready
   socket.on("ready", () => {
     socket.emit("greeting", roomInfo.players);
-    socket.to(roomInfo.roomKey).emit("new player", socket.id, roomInfo.players[socket.id]);
+    // socket.to(roomInfo.roomKey).emit("new player", socket.id, roomInfo.players[socket.id]);
   });
 
   // when a player moves, update the player data
@@ -14,11 +14,6 @@ export function gameCommunication(socket, roomInfo) {
       // emit a message to all players about the player that moved
       socket.to(roomInfo.roomKey).emit("player moved", roomInfo.players[socket.id]);
     }
-  });
-
-  // when a player moves, update the range
-  socket.on("player movement, range", function (data) {
-    socket.to(roomInfo.roomKey).emit("player moved, range", roomInfo.players[socket.id]);
   });
 
   // when a player opens a vote

@@ -25,6 +25,7 @@ export default class MainScene extends Phaser.Scene {
     this.load.image("abilityStun", "assets/abilityStun.png")
     this.load.image("abilityTransform", "assets/abilityTransform.png")
     this.load.image("abilitySteal", "assets/abilitySteal.png")
+    this.load.image("voteButton", "assets/voteButton.png")
     this.load.image("brokenTool", "assets/brokenTool.png")
     this.load.bitmapFont("pixelFont", "fonts/pixel.png", "fonts/pixel.xml");
     this.load.image("guiGold", "assets/guiGold.png")
@@ -66,6 +67,12 @@ export default class MainScene extends Phaser.Scene {
     }
   }
 
+  voteButtomUpdateTimer(scene){
+    --scene.voteButtomCounter
+    if (scene.voteButtomCounter == 0) {
+      scene.voteButtom.removeInteractive().setTint(0x363636);
+    }
+  }
   create() {
     const scene = this;
 
@@ -148,12 +155,8 @@ export default class MainScene extends Phaser.Scene {
       this.abilityBreakText.setVisible(true);
 
       // functionality overlap players
-      this.otherPlayers.children.each(function(player) {
-        if(this.checkOverlapPlayers(this.player.range, player, this)){
-          this.socket.emit("breakTool player", player.socketId);
-          return false;
-        }
-      }, this);
+      this.player.breakToolClosePlayer()
+      
     })
 
     // draw ability buttom and text
@@ -170,25 +173,17 @@ export default class MainScene extends Phaser.Scene {
       this.abilityStunBt.removeInteractive();
       this.abilityStealBt.setVisible(true);
 
-
       //overlap players
-      this.otherPlayers.children.each(function(player) {
-        if(this.checkOverlapPlayers(this.player.range, player, this)){
-          this.socket.emit("stun player", player.socketId);
-          return false;
-        }
-      }, this);
+      this.player.stunClosePlayer()
+      
     })
 
     this.abilityStealBt.on("pointerup",()=>{
 
       // overlap players
-      this.otherPlayers.children.each(function(player) {
-        if(this.checkOverlapPlayers(this.player.range, player, this)){
-          this.socket.emit("steal player", {objective: player.socketId, origin: this.socket.id});
-          return false;
-        }
-      }, this);
+
+      this.player.stealClosePlayer(this.socket.id)
+      
       this.abilityStunText.setAlpha(1)
       this.abilityStealBt.setVisible(false);
       this.abilityStunBt.setVisible(true);
@@ -213,8 +208,15 @@ export default class MainScene extends Phaser.Scene {
       this.player.label.setText(player.name);
     })
 
-    this.brokenToolImage = this.add.image(640, 600, "brokenTool").setScrollFactor(0).setScale(1.65).setDepth(1).setVisible(false);
+    this.brokenToolImage = this.add.image(720, 600, "brokenTool").setScrollFactor(0).setScale(1.65).setDepth(1).setVisible(false);
 
+    this.voteButtom = this.add.image(800, 600 , 'voteButton').setScrollFactor(0).setScale(1.65).setDepth(1).setVisible(true).setTint(0x363636);
+    
+    // add event click vote buttom
+    this.voteButtom.on("pointerup",()=>{
+      console.log("tira vote");
+    })
+    
     //CHECK COLLIDES WALLS
       // const debugGraphicsWALLS = this.add.graphics().setAlpha(0.75);
       // this.wallsLayer.renderDebug(debugGraphicsWALLS, {
@@ -250,9 +252,9 @@ export default class MainScene extends Phaser.Scene {
       });
     });
 
-    this.socket.on("new player", (id, playerData) => {
-      scene.addOtherPlayers(id, playerData);
-    });
+    // this.socket.on("new player", (id, playerData) => {
+    //   scene.addOtherPlayers(id, playerData);
+    // });
 
     this.socket.on("disconnected", (roomInfo) => {
       scene.otherPlayers.getChildren().forEach(function (otherPlayer) {
@@ -263,6 +265,7 @@ export default class MainScene extends Phaser.Scene {
     });
 
     this.socket.on("player moved", function (playerData) {
+      console.log(playerData);
       scene.otherPlayers.getChildren().forEach(function (otherPlayer) {
         if (playerData.socketId === otherPlayer.socketId) {
           otherPlayer.anims.play(playerData.keydown, true);
@@ -459,12 +462,6 @@ export default class MainScene extends Phaser.Scene {
       this.otherPlayer.anims.play("right_idle", true);
       this.otherPlayers.add(this.otherPlayer);  
     }
-  }
-
-  checkOverlapPlayers(range, otherPlayer, scene) {
-    let rectangleArea = new Phaser.Geom.Rectangle(range.x, range.y, range.width+45, range.height+45, 0x6666ff);
-    let rectanglePlayer = new Phaser.Geom.Rectangle(otherPlayer.x, otherPlayer.y, otherPlayer.width+10, otherPlayer.height+20, 0x2222ff);
-    return Phaser.Geom.Intersects.RectangleToRectangle(rectangleArea, rectanglePlayer);
   }
 
   checkOverlapJail(range, areaJail, scene) {

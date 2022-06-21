@@ -34,30 +34,6 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     // this.setCollideWorldBounds(true);
     this.miningCount = 0;
 
-    // range
-    this.range = scene.add.sprite(this.x, this.y, "range");
-    scene.physics.world.enable(this.range);
-    this.range.setAlpha(0);
-    this.range.body.setSize(this.width + 50, this.height + 50, -5, 0);
-
-    //overlap ores
-    scene.physics.add.overlap(this.range, scene.ores, this.checkNearOre, () => {}, this);
-    
-    //  overlap vote
-    scene.physics.add.overlap(this.range, scene.voteObject, this.voteObjectInside, null, scene)    
-    
-    //  overlap anvil
-    scene.physics.add.overlap(this.range, scene.anvilObject, this.anvilObjectInside, null, this)    
-
-    //  overlap minecartGeneral
-    scene.physics.add.overlap(this.range, scene.minecartGeneralObject, this.minecartGeneralObjectInside, null, this)    
-
-    //  overlap minecartImpostor
-    scene.physics.add.overlap(this.range, scene.minecartImpostorObject, this.minecartImpostorObjectInside, null, this)    
-
-    //  overlap buttom jail
-    scene.physics.add.overlap(this.range, scene.buttonJailObject, this.buttonJailObjectInside, null, this)    
-
     // size
     this.setScale(1.4);
 
@@ -91,14 +67,20 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     scene.goldPlayerGui.setText("0");
     scene.goldTeamNormalGui.setText("0");
     scene.goldTeamImpostorGui.setText("0");
-    
-    scene.socket.on("player moved, range", function (playerData) {
-      scene.otherPlayers.getChildren().forEach(function (otherPlayer) {
-        if (playerData.socketId === otherPlayer.socketId) {
-          otherPlayer.range.x = otherPlayer.x;
-          otherPlayer.range.y = otherPlayer.y;
-        }
-      });
+
+    scene.socket.on("check player stunned", function (origin) {
+      if (scene.player.stunned) {
+        scene.socket.emit("i am on the floor",origin)
+      }
+    });
+
+    scene.socket.on("on the floor", function () {
+      scene.voteButtom.clearTint().setInteractive();
+      scene.voteButtomCounter = 3;
+      if (scene.voteButtomTimer) {
+        scene.voteButtomTimer.remove(false);
+      }
+      scene.voteButtomTimer = scene.time.addEvent({ delay: 1000, repeat: 3, callback: scene.voteButtomUpdateTimer, args: [scene]})  
     });
 
     // Animations
@@ -176,16 +158,38 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
   update() {
     this.label.x = this.x;
     this.label.y = this.y - 38;
-    this.range.x = this.x;
-    this.range.y = this.y;
 
-    this.scene.socket.emit("player movement, range");
+
+    this.overlap = this.scene.physics.overlapRect(this.x - 25, this.y - 25, this.width + 50, this.height + 50);
+
 
     // if the player is thief
     if (this.thief) {
       this.scene.abilityBreakBt.setVisible(true);
       this.scene.abilityStunBt.setVisible(true);
       this.scene.abilityTransformBt.setVisible(true)
+    }
+
+    if (this.overlap.includes(this.scene.minecartGeneralObject.body)) {
+      this.minecartGeneralObjectInside();
+    }
+    if (this.overlap.includes(this.scene.voteObject.body)) {
+      this.voteObjectInside();
+    }
+    if (this.overlap.includes(this.scene.minecartImpostorObject.body)) {
+      this.minecartImpostorObjectInside();
+    }
+    if (this.overlap.includes(this.scene.anvilObject.body)) {
+      this.anvilObjectInside();
+    }
+    if (this.overlap.find(body => body.gameObject.texture.key === "ore" && body.enable)) {
+      this.checkNearOre(null, this.overlap.find(body => body.gameObject.texture.key === "ore").gameObject);
+    }
+      
+    //overlap players to check if there is stunned player
+    const objective = this.checkOverlapPlayers()
+    if (objective) {
+      this.scene.socket.emit("player stunned", {origin: this.socketId, objective: objective.gameObject.socketId});    
     }
 
     //Camera Follow
@@ -239,6 +243,25 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     }
   }
 
+  checkOverlapPlayers(){
+    return this.overlap.find(body => body.gameObject.texture.key === "player" && body.gameObject.socketId !== this.socketId);
+  }
+
+  stunClosePlayer(){
+    const closePlayer = this.checkOverlapPlayers();
+    if (closePlayer) this.scene.socket.emit("stun player", closePlayer.gameObject.socketId);
+  }
+
+  breakToolClosePlayer(){
+    const closePlayer = this.checkOverlapPlayers();
+    if (closePlayer) this.scene.socket.emit("breakTool player", closePlayer.gameObject.socketId);
+  }
+
+  stealClosePlayer(id){
+    const closePlayer = this.checkOverlapPlayers();
+    if (closePlayer) this.scene.socket.emit("steal player", {objective: closePlayer.gameObject.socketId, origin: id});
+  }
+
   stunnedUpdateTimer(scene){
     //finish counter
     --scene.player.stunnedCounter;
@@ -254,7 +277,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     return ["left", "left_idle", "up", "down"].includes(this.keydown) ? "left" : "right";
   }
 
-  checkNearOre(range, ore, ) {
+  checkNearOre(range, ore) {
     if (this.miningCount > 2) {
       ore.disableBody(true, true);
       this.scene.socket.emit("disable ore", ore);
@@ -286,7 +309,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.scene.anvilObjectKeyEText.setVisible(true)
 
     if (Phaser.Input.Keyboard.JustDown(this.scene.keyE)) {
-      console.log("Interactuas");
+      console.log("Interactuas anvil");
       if (!this.tool) {
         let costTool = 20;
         let total = parseInt(this.scene.goldTeamNormalGui._text, 10) - costTool;
@@ -304,7 +327,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.scene.minecartGeneralObjectKeyEText.setVisible(true)
 
     if (Phaser.Input.Keyboard.JustDown(this.scene.keyE)) {
-      console.log("Interactuas");
+      console.log("Interactuas minecartGeneral");
       let gold = parseInt(this.scene.goldPlayerGui._text, 10) + parseInt(this.scene.goldTeamNormalGui._text, 10)
       this.scene.socket.emit("update goldTeamNormalGui",gold);
       this.scene.goldTeamNormalGui.setText(gold);
@@ -317,7 +340,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
       this.scene.minecartImpostorObjectKeyEText.setVisible(true)
 
       if (Phaser.Input.Keyboard.JustDown(this.scene.keyE)) {
-        console.log("Interactuas");
+        console.log("Interactuas minecartImpostor");
         let gold = parseInt(this.scene.goldPlayerGui._text, 10) + parseInt(this.scene.goldTeamImpostorGui._text, 10)
         this.scene.socket.emit("update goldTeamImpostorGui",gold);
         this.scene.goldTeamImpostorGui.setText(gold);
@@ -332,7 +355,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
       this.scene.buttonJailObjectKeyEText.setVisible(true)
 
       if (Phaser.Input.Keyboard.JustDown(this.scene.keyE)) {
-        console.log("Interactuas");
+        console.log("Interactuas buttonJail");
 
         // functionality overlap players with jail
         this.scene.otherPlayers.children.each(function(player) {
