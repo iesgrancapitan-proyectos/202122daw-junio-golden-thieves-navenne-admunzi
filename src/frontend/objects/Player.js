@@ -289,18 +289,18 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
   }
 
   voteObjectInside(){
-    this.voteObjectKeyEText.setVisible(true)
+    this.scene.voteObjectKeyEText.setVisible(true)
 
-    if (Phaser.Input.Keyboard.JustDown(this.keyE) && this.votingPanelEnabled) {
-      this.socket.emit("vote panels");
-      this.socket.emit("start timer");
-      this.scene.pause('MainScene');
-      this.scene.launch('VoteScene', { socket: this.socket, player: this.player, otherPlayers: this.otherPlayers});
-      this.votingPanelEnabled = false;
-      this.socket.emit("voting panel disabled");
+    if (Phaser.Input.Keyboard.JustDown(this.scene.keyE) && this.scene.votingPanelEnabled) {
+      this.scene.socket.emit("vote panels");
+      this.scene.socket.emit("start timer");
+      this.scene.scene.pause('MainScene');
+      this.scene.scene.launch('VoteScene', { socket: this.scene.socket, player: this, otherPlayers: this.scene.otherPlayers});
+      this.scene.votingPanelEnabled = false;
+      this.scene.socket.emit("voting panel disabled");
       setTimeout(() => {
-        this.votingPanelEnabled = true;
-        this.socket.emit("voting panel enabled");
+        this.scene.votingPanelEnabled = true;
+        this.scene.socket.emit("voting panel enabled");
       }, 25000);
     }
   }

@@ -19,7 +19,10 @@ export default class VoteScene extends Phaser.Scene {
   create() {
     const scene = this;
 
+    this.timer = 30
+
     this.votes = [];
+    console.log(this.votes);
     this.timerCounterText = createText(scene, 0.7, 0.29, "", 30, true, 3);
 
     const WIDTH = this.renderer.width;
@@ -138,6 +141,8 @@ export default class VoteScene extends Phaser.Scene {
         selected.push(vote)
       }
     });
+
+    console.log(this.votes);
 
     if (selected.length == 1) {
       const socketId = selected[0].socketId;

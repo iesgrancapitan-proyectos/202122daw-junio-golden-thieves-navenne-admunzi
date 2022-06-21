@@ -214,7 +214,10 @@ export default class MainScene extends Phaser.Scene {
     
     // add event click vote buttom
     this.voteButtom.on("pointerup",()=>{
-      console.log("tira vote");
+      this.socket.emit("vote panels");
+      this.socket.emit("start timer");
+      this.scene.pause('MainScene');
+      this.scene.launch('VoteScene', { socket: this.socket, player: this.player, otherPlayers: this.otherPlayers});
     })
     
     //CHECK COLLIDES WALLS
