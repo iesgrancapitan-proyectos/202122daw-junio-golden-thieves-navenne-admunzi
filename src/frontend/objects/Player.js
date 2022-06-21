@@ -22,6 +22,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.stunned = false;
     this.tool = true;
     this.thief = data.thief;
+    this.inJail = data.inJail;
 
     // colliders
     // scene.physics.add.collider(this, scene.wallsLayer);
@@ -289,10 +290,18 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
 
   voteObjectInside(){
     this.scene.voteObjectKeyEText.setVisible(true)
-    console.log("esto si ");
-    if (Phaser.Input.Keyboard.JustDown(this.scene.keyE)) {
+
+    if (Phaser.Input.Keyboard.JustDown(this.scene.keyE) && this.scene.votingPanelEnabled) {
       this.scene.socket.emit("vote panels");
-      this.scene.scene.launch('VoteScene',this);
+      this.scene.socket.emit("start timer");
+      this.scene.scene.pause('MainScene');
+      this.scene.scene.launch('VoteScene', { socket: this.scene.socket, player: this, otherPlayers: this.scene.otherPlayers});
+      this.scene.votingPanelEnabled = false;
+      this.scene.socket.emit("voting panel disabled");
+      setTimeout(() => {
+        this.scene.votingPanelEnabled = true;
+        this.scene.socket.emit("voting panel enabled");
+      }, 25000);
     }
   }
 
@@ -352,6 +361,8 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         this.scene.otherPlayers.children.each(function(player) {
           if(this.scene.checkOverlapJail(player.range, this.scene.areaJail)){
             this.scene.socket.emit("leave jail", player.socketId);
+            player.inJail = false;
+            this.scene.socket.emit("update players", { socketId: player.socketId, inJail: player.inJail });
             player.x = 3050;
             player.y = 2080;
           }

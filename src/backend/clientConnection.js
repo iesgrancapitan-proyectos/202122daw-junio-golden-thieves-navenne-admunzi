@@ -1,5 +1,5 @@
 import { gameCommunication } from "./gameCommunication";
-import { getColor } from "../frontend/functions";
+import { getColor } from "../utils/functions";
 
 export function clientConnection(io) {
   let gameRooms = {};
@@ -147,6 +147,11 @@ export function clientConnection(io) {
       io.to(id).emit('i am out jail');
     });
 
+    socket.on("enter jail", function (id) {
+      // put player in jail
+      io.to(id).emit('i am in jail');
+    });
+
     // when a player use break tool ability
     socket.on("breakTool player", function (id) {
       // emit break tool to the player
@@ -187,6 +192,7 @@ export function clientConnection(io) {
       name: playerName,
       color: getColor(playerNum),
       thief: false,
+      inJail: false,
     });
   }
 

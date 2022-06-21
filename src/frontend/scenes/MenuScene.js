@@ -1,4 +1,4 @@
-import { createText } from "../functions";
+import { createText } from "../../utils/functions";
 export default class MenuScene extends Phaser.Scene {
     constructor() {
       super("MenuScene");

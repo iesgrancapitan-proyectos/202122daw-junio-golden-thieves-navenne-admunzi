@@ -17,7 +17,7 @@ const config = {
     width: DEFAULT_WIDTH,
     height: DEFAULT_HEIGHT,
   },
-  scene: [ MenuScene, LobbyScene, RoomScene, MainScene ],
+  scene: [ MenuScene, LobbyScene, RoomScene, MainScene, VoteScene],
   pixelArt: true,
   physics: {
     default: "arcade",
