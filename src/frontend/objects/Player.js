@@ -195,8 +195,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     //Camera Follow
     this.scene.cameras.main.startFollow(this, true, 0.05, 0.05);
 
-    // const VELOCITY = 160; //ORIGINAL
-    const VELOCITY = 300; //DEV
+    const VELOCITY = 160;
 
     // idle
     this.setVelocity(0);
