@@ -113,7 +113,7 @@ export default class LobbyScene extends Phaser.Scene {
     map.createLayer("under-bridge", tilesetUnderBridge);
     map.createLayer("bridge", tileset);
 
-    const ORES_AMOUNT = 120;
+    const ORES_AMOUNT = 200;
     if (!oresList) {
       map.oresList = Array.from({ length: ORES_AMOUNT });
       map.ores = [];

@@ -10,6 +10,7 @@ export default class RoomScene extends Phaser.Scene {
   }
 
   preload() {
+    this.load.image("background-room", "assets/RoomScene/background.png")
     this.load.bitmapFont("pixelFont", "fonts/pixel.png", "fonts/pixel.xml");
     this.load.html('roomform', 'assets/RoomScene/roomform.html');
     this.load.css('form_stylesheet', 'assets/form_stylesheet.css');
@@ -20,6 +21,8 @@ export default class RoomScene extends Phaser.Scene {
 
     const WIDTH = this.renderer.width;
     const HEIGHT = this.renderer.height;
+
+    this.add.image(WIDTH / 2, HEIGHT / 2, 'background-room').setDepth(0).setScale(1.3);
 
     this.popUp = this.add.graphics();
     this.buttons = this.add.graphics();

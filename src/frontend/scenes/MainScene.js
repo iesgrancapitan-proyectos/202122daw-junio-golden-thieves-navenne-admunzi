@@ -293,7 +293,6 @@ export default class MainScene extends Phaser.Scene {
     });
 
     this.socket.on("i am stunned", function () {
-      console.log("aturdido");
       scene.player.stunned = true;
       scene.player.stunnedCounter = 9;
       scene.physics.world.disable(scene.player);

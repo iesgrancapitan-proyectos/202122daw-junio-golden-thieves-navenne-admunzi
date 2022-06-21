@@ -25,7 +25,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.inJail = data.inJail;
 
     // colliders
-    // scene.physics.add.collider(this, scene.wallsLayer);
+    scene.physics.add.collider(this, scene.wallsLayer);
     scene.physics.add.collider(this, scene.fallLayer);
     scene.physics.add.collider(this, scene.ores);
     scene.physics.add.collider(this, scene.interactable_objectsLayer);
@@ -47,10 +47,10 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
 
     // mining
     this.on("animationcomplete-left_mine", () => {
-      console.log(this.miningCount++);
+      this.miningCount++
     });
     this.on("animationcomplete-right_mine", () => {
-      console.log(this.miningCount++);
+      this.miningCount++
     });
 
     //FOV
@@ -266,10 +266,8 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     //finish counter
     --scene.player.stunnedCounter;
     if (scene.player.stunnedCounter == 0) {
-      console.log("tiempo terminado");
       scene.player.stunned = false;
       scene.physics.world.enable(scene.player);
-
     }
   }
 
@@ -309,7 +307,6 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.scene.anvilObjectKeyEText.setVisible(true)
 
     if (Phaser.Input.Keyboard.JustDown(this.scene.keyE)) {
-      console.log("Interactuas anvil");
       if (!this.tool) {
         let costTool = 20;
         let total = parseInt(this.scene.goldTeamNormalGui._text, 10) - costTool;
@@ -327,7 +324,6 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.scene.minecartGeneralObjectKeyEText.setVisible(true)
 
     if (Phaser.Input.Keyboard.JustDown(this.scene.keyE)) {
-      console.log("Interactuas minecartGeneral");
       let gold = parseInt(this.scene.goldPlayerGui._text, 10) + parseInt(this.scene.goldTeamNormalGui._text, 10)
       this.scene.socket.emit("update goldTeamNormalGui",gold);
       this.scene.goldTeamNormalGui.setText(gold);
@@ -340,7 +336,6 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
       this.scene.minecartImpostorObjectKeyEText.setVisible(true)
 
       if (Phaser.Input.Keyboard.JustDown(this.scene.keyE)) {
-        console.log("Interactuas minecartImpostor");
         let gold = parseInt(this.scene.goldPlayerGui._text, 10) + parseInt(this.scene.goldTeamImpostorGui._text, 10)
         this.scene.socket.emit("update goldTeamImpostorGui",gold);
         this.scene.goldTeamImpostorGui.setText(gold);
