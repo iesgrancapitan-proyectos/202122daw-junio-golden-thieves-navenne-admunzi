@@ -25,13 +25,13 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.inJail = data.inJail;
 
     // colliders
-    scene.physics.add.collider(this, scene.wallsLayer);
-    scene.physics.add.collider(this, scene.fallLayer);
-    scene.physics.add.collider(this, scene.ores);
-    scene.physics.add.collider(this, scene.interactable_objectsLayer);
+    console.log(this.scene.map);
+    this.scene.physics.add.collider(this, this.scene.map.wallsLayer);
+    this.scene.physics.add.collider(this, this.scene.map.fallLayer);
+    this.scene.physics.add.collider(this, this.scene.ores);
+    this.scene.physics.add.collider(this, this.scene.map.interactable_objectsLayer);
 
     this.onWorldBounds = true;
-    // this.setCollideWorldBounds(true);
     this.miningCount = 0;
 
     // size

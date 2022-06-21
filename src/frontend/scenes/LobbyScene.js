@@ -144,9 +144,9 @@ export default class LobbyScene extends Phaser.Scene {
       });
     }
 
-    map.createLayer("fall", tileset).setCollisionByProperty({ collides: true });
-    map.createLayer("walls", tileset).setCollisionByProperty({ collides: true });
-    map.createLayer("interactable-objects", tilesetMiscObjects).setCollisionByProperty({ collides: true });
+    map.fallLayer = map.createLayer("fall", tileset).setCollisionByProperty({ collides: true });
+    map.wallsLayer = map.createLayer("walls", tileset).setCollisionByProperty({ collides: true });
+    map.interactable_objectsLayer =  map.createLayer("interactable-objects", tilesetMiscObjects).setCollisionByProperty({ collides: true });
 
     return map;
   }
