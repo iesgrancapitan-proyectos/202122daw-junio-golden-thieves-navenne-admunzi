@@ -1,5 +1,4 @@
 import Player from "../objects/Player";
-import Ore from "../objects/Ore";
 
 export default class MainScene extends Phaser.Scene {
   constructor() {
@@ -78,6 +77,7 @@ export default class MainScene extends Phaser.Scene {
     const scene = this;
 
     this.playerLayer = this.add.layer();
+    this.votingPanelEnabled = true;
     
     // Goals
     this.goldGoalNormal = 2000;
@@ -214,7 +214,10 @@ export default class MainScene extends Phaser.Scene {
     
     // add event click vote buttom
     this.voteButtom.on("pointerup",()=>{
-      console.log("tira vote");
+      this.socket.emit("vote panels");
+      this.socket.emit("start timer");
+      this.scene.pause('MainScene');
+      this.scene.launch('VoteScene', { socket: this.socket, player: this.player, otherPlayers: this.otherPlayers});
     })
     
     //CHECK COLLIDES WALLS
@@ -304,11 +307,11 @@ export default class MainScene extends Phaser.Scene {
       })
     });
 
-    this.socket.on("vote panel", function (playerData) {
-      scene.otherPlayers.getChildren().forEach(function (otherPlayer) {
-        scene.scene.launch('VoteScene',this);
-
-      });
+    this.socket.on("vote panel", function () {
+      if (!scene.player.inJail) {
+        scene.scene.pause('MainScene');
+        scene.scene.launch('VoteScene', { socket: scene.socket, player: scene.player, otherPlayers: scene.otherPlayers});
+      }
     });
 
     this.socket.on("i am stunned", function () {
@@ -329,6 +332,24 @@ export default class MainScene extends Phaser.Scene {
     this.socket.on("i am out jail", function () {
       scene.player.x = 3050;
       scene.player.y = 2080;
+      scene.player.inJail = false;
+      scene.socket.emit("update players", { socketId: scene.player.socketId, inJail: scene.player.inJail });
+    });
+    
+    this.socket.on("i am in jail", function () {
+      scene.player.x = 3160;
+      scene.player.y = 2040;
+      scene.player.inJail = true;
+      scene.socket.emit("update players", { socketId: scene.player.socketId, inJail: scene.player.inJail });
+    });
+
+    this.socket.on("update inJail", function (player) {
+      scene.otherPlayers.getChildren().forEach(function (otherPlayer) {
+        if (player.socketId === otherPlayer.socketId) {
+          console.log("kk");
+          otherPlayer.inJail = player.inJail;
+        }
+      }); 
     });
     
     this.socket.on("stolen player", function (data) {
@@ -359,6 +380,14 @@ export default class MainScene extends Phaser.Scene {
           otherPlayer.label.setText(aData[1].name)
         }
       });
+    });
+
+    this.socket.on("disable voting panel", function () {
+      scene.votingPanelEnabled = false;
+    });
+
+    this.socket.on("enable voting panel", function () {
+      scene.votingPanelEnabled = true;
     });
 
     this.socket.emit("ready");
@@ -429,11 +458,13 @@ export default class MainScene extends Phaser.Scene {
 
   // add any additional players
   addOtherPlayers(id, playerData) {
-    this.otherPlayer = new Player(this, id, playerData);
-    this.otherPlayer.label.x = playerData.x;
-    this.otherPlayer.label.y = playerData.y - 38;
-    this.otherPlayer.anims.play("right_idle", true);
-    this.otherPlayers.add(this.otherPlayer);
+    if (!this.otherPlayers.getChildren().find((otherPlayer) => id == otherPlayer.socketId)) {
+      this.otherPlayer = new Player(this, id, playerData);
+      this.otherPlayer.label.x = playerData.x;
+      this.otherPlayer.label.y = playerData.y - 38;
+      this.otherPlayer.anims.play("right_idle", true);
+      this.otherPlayers.add(this.otherPlayer);  
+    }
   }
 
   checkOverlapJail(range, areaJail, scene) {
