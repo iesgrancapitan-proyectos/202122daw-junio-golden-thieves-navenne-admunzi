@@ -33,30 +33,6 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     // this.setCollideWorldBounds(true);
     this.miningCount = 0;
 
-    // range
-    this.range = scene.add.sprite(this.x, this.y, "range");
-    scene.physics.world.enable(this.range);
-    this.range.setAlpha(0);
-    this.range.body.setSize(this.width + 50, this.height + 50, -5, 0);
-
-    //overlap ores
-    scene.physics.add.overlap(this.range, scene.ores, this.checkNearOre, () => {}, this);
-    
-    //  overlap vote
-    scene.physics.add.overlap(this.range, scene.voteObject, this.voteObjectInside, null, scene)
-    
-    //  overlap anvil
-    scene.physics.add.overlap(this.range, scene.anvilObject, this.anvilObjectInside, null, this)    
-
-    //  overlap minecartGeneral
-    scene.physics.add.overlap(this.range, scene.minecartGeneralObject, this.minecartGeneralObjectInside, null, this)    
-
-    //  overlap minecartImpostor
-    scene.physics.add.overlap(this.range, scene.minecartImpostorObject, this.minecartImpostorObjectInside, null, this)    
-
-    //  overlap buttom jail
-    scene.physics.add.overlap(this.range, scene.buttonJailObject, this.buttonJailObjectInside, null, this)    
-
     // size
     this.setScale(1.4);
 
@@ -90,15 +66,6 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     scene.goldPlayerGui.setText("0");
     scene.goldTeamNormalGui.setText("0");
     scene.goldTeamImpostorGui.setText("0");
-    
-    scene.socket.on("player moved, range", function (playerData) {
-      scene.otherPlayers.getChildren().forEach(function (otherPlayer) {
-        if (playerData.socketId === otherPlayer.socketId) {
-          otherPlayer.range.x = otherPlayer.x;
-          otherPlayer.range.y = otherPlayer.y;
-        }
-      });
-    });
 
     scene.socket.on("check player stunned", function (origin) {
       if (scene.player.stunned) {
@@ -190,10 +157,10 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
   update() {
     this.label.x = this.x;
     this.label.y = this.y - 38;
-    this.range.x = this.x;
-    this.range.y = this.y;
 
-    this.scene.socket.emit("player movement, range");
+
+    this.overlap = this.scene.physics.overlapRect(this.x - 25, this.y - 25, this.width + 50, this.height + 50);
+
 
     // if the player is thief
     if (this.thief) {
@@ -202,12 +169,27 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
       this.scene.abilityTransformBt.setVisible(true)
     }
 
+    if (this.overlap.includes(this.scene.minecartGeneralObject.body)) {
+      this.minecartGeneralObjectInside();
+    }
+    if (this.overlap.includes(this.scene.voteObject.body)) {
+      this.voteObjectInside();
+    }
+    if (this.overlap.includes(this.scene.minecartImpostorObject.body)) {
+      this.minecartImpostorObjectInside();
+    }
+    if (this.overlap.includes(this.scene.anvilObject.body)) {
+      this.anvilObjectInside();
+    }
+    if (this.overlap.find(body => body.gameObject.texture.key === "ore" && body.enable)) {
+      this.checkNearOre(null, this.overlap.find(body => body.gameObject.texture.key === "ore").gameObject);
+    }
+      
     //overlap players to check if there is stunned player
-    this.scene.otherPlayers.children.each(function(player) {
-      if(this.scene.checkOverlapPlayers(this.range, player, this.scene)){
-        this.scene.socket.emit("player stunned", {origin:this.socketId, objective: player.socketId});    
-      }
-    }, this);
+    const objective = this.checkOverlapPlayers()
+    if (objective) {
+      this.scene.socket.emit("player stunned", {origin: this.socketId, objective: objective.gameObject.socketId});    
+    }
 
     //Camera Follow
     this.scene.cameras.main.startFollow(this, true, 0.05, 0.05);
@@ -260,6 +242,25 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     }
   }
 
+  checkOverlapPlayers(){
+    return this.overlap.find(body => body.gameObject.texture.key === "player" && body.gameObject.socketId !== this.socketId);
+  }
+
+  stunClosePlayer(){
+    const closePlayer = this.checkOverlapPlayers();
+    if (closePlayer) this.scene.socket.emit("stun player", closePlayer.gameObject.socketId);
+  }
+
+  breakToolClosePlayer(){
+    const closePlayer = this.checkOverlapPlayers();
+    if (closePlayer) this.scene.socket.emit("breakTool player", closePlayer.gameObject.socketId);
+  }
+
+  stealClosePlayer(id){
+    const closePlayer = this.checkOverlapPlayers();
+    if (closePlayer) this.scene.socket.emit("steal player", {objective: closePlayer.gameObject.socketId, origin: id});
+  }
+
   stunnedUpdateTimer(scene){
     //finish counter
     --scene.player.stunnedCounter;
@@ -275,7 +276,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     return ["left", "left_idle", "up", "down"].includes(this.keydown) ? "left" : "right";
   }
 
-  checkNearOre(range, ore, ) {
+  checkNearOre(range, ore) {
     if (this.miningCount > 2) {
       ore.disableBody(true, true);
       this.scene.socket.emit("disable ore", ore);
@@ -287,11 +288,11 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
   }
 
   voteObjectInside(){
-    this.voteObjectKeyEText.setVisible(true)
-
-    if (Phaser.Input.Keyboard.JustDown(this.keyE)) {
-      this.socket.emit("vote panels");
-      this.scene.launch('VoteScene',this);
+    this.scene.voteObjectKeyEText.setVisible(true)
+    console.log("esto si ");
+    if (Phaser.Input.Keyboard.JustDown(this.scene.keyE)) {
+      this.scene.socket.emit("vote panels");
+      this.scene.scene.launch('VoteScene',this);
     }
   }
 
