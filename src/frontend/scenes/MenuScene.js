@@ -39,7 +39,7 @@ export default class MenuScene extends Phaser.Scene {
         });
 
         howToPlayButton.on("pointerup", function() {
-            console.log("How to play"); // to do 
+            window.open("https://github.com/iesgrancapitan-proyectos/202122daw-junio-golden-thieves-navenne-admunzi/wiki/Manual_Usuario", "Tutorial")
         })
 
         const text = createText(this, 0.5, 0.42, 'Please enter your name', FONT_SIZE_SMALL, false);
